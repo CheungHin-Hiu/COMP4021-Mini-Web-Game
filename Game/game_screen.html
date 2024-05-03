@@ -64,17 +64,24 @@
     <script src="gun.js"></script>
     <script src="game_object.js"></script>
     <script src="ability.js"></script>
+    <script src="utility.js"></script>
     <script>
-     $(function() {
+
+    $(function() {
         //Get the canvas and 2D content
         const cv = $("canvas").get(0);
         const context = cv.getContext("2d");
 
         let gameStartTime = 0;
 
+        let currentTime = 0;
+
+        let totalShot = 0;
+
+        let hitShot = 0;
 
         const totalGameTime = 150;
-        const score = 0;
+        let score = 0;
 
         //Create the game area
         const gameArea = BoundingBox(context, 0, 0, 700, 1050);
@@ -88,19 +95,27 @@
         objects[1].randomize(1);
         objects[2].randomize(2);
         abilitys[0].randomize();
-
-        function randomization(itemsList)
+        
+        function checkFireHit(hitX, hitY, objectsList)
         {
-            for(let i = 0; i < itemsList.length; i++){
-                let {x,y} = itemsList[i].getXY();
-                if(x <= -100 || x >= 1300 || y >= 900)
-                    itemsList[i].randomize(i);
+            totalShot +=1;
+            for(let i = 0; i<objectsList.length; i++)
+            {   
+                if(objectsList[i].getBoundingBox().isPointInBox(hitX,hitY))
+                {
+                    hitShot += 1;
+                    score += objectsList[i].rewardPoints();
+                    $("#your-score").text(String(score));
+                    objectsList[i].randomize(i);
+                }
             }
+            $("#accuracy").text(String(Math.round(hitShot/totalShot * 100)) + "%");
         }
 
         function doFrame(now){
             if (gameStartTime == 0) gameStartTime = now;
-
+            
+            currentTime = now;
             //Update the time remaining
             const gameTimeSoFar = now - gameStartTime;
             const timeRemaining = Math.ceil((totalGameTime * 1000 - gameTimeSoFar) /1000);
@@ -108,20 +123,22 @@
             $("#time-remaining").text(timeRemaining);
 
             playerGun.update(now);
-            objects[0].update();
-            objects[1].update();
-            objects[2].update();
-            abilitys[0].update();
+            objects[0].update(now);
+            objects[1].update(now);
+            objects[2].update(now);
+            abilitys[0].update(now);
             
             randomization(objects);
             randomization(abilitys);
+            const {x, y} = (playerGun.getXY());
+            checkCollision(x,y, abilitys, playerGun);
             context.clearRect(0, 0, cv.width, cv.height);
 
-            playerGun.draw();
             objects[0].draw();
             objects[1].draw();
             objects[2].draw();
             abilitys[0].draw();
+            playerGun.draw();
             requestAnimationFrame(doFrame);
         }
 
@@ -141,7 +158,8 @@
                 playerGun.move(4);
             }
             else if (event.keyCode == "32"){
-                playerGun.shoot();
+                const {x, y} = playerGun.shoot(currentTime);
+                checkFireHit(x, y, objects);
             }
         });
 

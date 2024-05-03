@@ -6,7 +6,7 @@ const Gun = function(ctx, x, y, gameArea)
 
     const seqeunces = {
         idle: {x:0, y: 0, width: 123, height: 128, count : 1, timing: 2000, loop: false},
-        fire: {x:0, y: 0, width: 123, height: 128, count : 5, timing : 10, loop : false}
+        fire: {x:0, y: 0, width: 123, height: 128, count : 5, timing : 100, loop : false}
     };
 
 
@@ -25,6 +25,9 @@ const Gun = function(ctx, x, y, gameArea)
     //This is the moving speed of the gun 
     let speed = 150;
 
+    let lastShoot = 0;
+
+    let shootSpeed = 1000;
     //Function setting the guns's moving direction
     const move = function(dir){
         direction = dir;
@@ -38,7 +41,7 @@ const Gun = function(ctx, x, y, gameArea)
 
     //SpeedUp function for speeding up the gun
     const speedUp = function() {
-        speed = speed * 2;
+        speed = speed + 10;
     }
 
     //SpeedDown function for speeding down the gun
@@ -46,12 +49,31 @@ const Gun = function(ctx, x, y, gameArea)
         speed = speed * 0.5;
     }
 
-    const shoot = function(){
-        sprite.setSequence(seqeunces.fire);
+    const shootSpeedUp = function(){
+        if(shootSpeed > 50){
+            shootSpeed -= 100;
+            console.log(shootSpeed);
+        }
+    }
 
-        let {x, y} = sprite.getXY();
+    const shoot = function(time){
+  
+        let canShoot = false;
+        if(lastShoot == 0){
+            canShoot = true;
+            lastShoot = time;
+        }
+        else if(time - lastShoot > shootSpeed){
+            canShoot = true;
+            lastShoot = time;
+        }
+        if(canShoot){
+            sprite.setSequence(seqeunces.fire);
 
-        return {x, y};
+            let {x, y} = sprite.getXY();
+            return {x, y};
+         }
+        return(-1, -1);
      
     }
 
@@ -81,7 +103,9 @@ const Gun = function(ctx, x, y, gameArea)
         slowDown: slowDown,
         getBoundingBox: sprite.getBoundingBox,
         draw: sprite.draw,
+        getXY: sprite.getXY,
         update: update,
-        shoot: shoot
+        shoot: shoot,
+        shootSpeedUp: shootSpeedUp
     }
 };
