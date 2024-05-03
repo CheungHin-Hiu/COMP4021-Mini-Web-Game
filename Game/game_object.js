@@ -12,6 +12,7 @@ const GameObject = function(ctx, x, y, type) {
 
     let direction = -1;
 
+    let objectType = "null";
     let speed = 200;
     //THe sprite object created from the Sprite modu;e
     const sprite = Sprite(ctx, x, y);
@@ -23,10 +24,11 @@ const GameObject = function(ctx, x, y, type) {
     //Set the type of the object
     const setType = function(type){
         sprite.setSequence(seqeunces[type]);
+        objectType = type;
     };
 
-    const rewardPoints = function(type){
-        switch(type){
+    const rewardPoints = function(){
+        switch(objectType){
             case "gem":
                 return 1;
             case "ring":

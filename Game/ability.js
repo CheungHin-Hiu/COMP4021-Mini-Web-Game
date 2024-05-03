@@ -4,16 +4,20 @@ const Ability = function(ctx, x, y, boostType){
         moveBoost: { x: 80, y: 16, width: 16, height: 16, count: 1, timing: 200, loop: false},
     };
 
-    let speed = 70;
+    let speed = 60;
+
+    let abilityType = "null";
 
     const sprite = Sprite(ctx, x, y);
 
     sprite.setSequence(seqeunces[boostType])
-        .setScale(2)
+        .setScale(4)
         .useSheet("ability.png");
 
     const setBoostType = function(boostType){
         sprite.setSequence(seqeunces[boostType]);
+        abilityType = boostType;
+        
     };
 
     const randomize = function(){
@@ -32,8 +36,11 @@ const Ability = function(ctx, x, y, boostType){
         let {x,y} = sprite.getXY();
         y += speed / 60;
         sprite.setXY(x,y);
-        console.log(sprite.getXY());
         sprite.update(time);
+    }
+
+    const getAbilityType = function(){
+        return abilityType;
     }
 
     return {
@@ -43,6 +50,7 @@ const Ability = function(ctx, x, y, boostType){
         randomize: randomize,
         getBoundingBox: sprite.getBoundingBox,
         draw: sprite.draw,
-        update: update
+        update: update,
+        getAbilityType: getAbilityType
     }
 }
