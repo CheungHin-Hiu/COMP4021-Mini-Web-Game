@@ -81,6 +81,8 @@
         let hitShot = 0;
 
         const totalGameTime = 150;
+
+        let enemyScore = 0;
         let score = 0;
 
         //Create the game area
@@ -121,6 +123,21 @@
             const timeRemaining = Math.ceil((totalGameTime * 1000 - gameTimeSoFar) /1000);
 
             $("#time-remaining").text(timeRemaining);
+            $("#your-score").text(String(score));
+
+            if(timeRemaining <= 0)
+            {
+                $("#time-remaining").text(0);
+                if(score > enemyScore)
+                    $("#win-lose").text("win");
+                else if(score < enemyScore)
+                    $("#win-lost").text("lose");
+                else
+                    $("$win-lose").text("draw");
+                $("#game-over").show();
+                setTimeout(() => {location.href = "/Project/public/Game/game_over.html"}, 3000);
+                return;
+            }
 
             playerGun.update(now);
             objects[0].update(now);
@@ -160,6 +177,10 @@
             else if (event.keyCode == "32"){
                 const {x, y} = playerGun.shoot(currentTime);
                 checkFireHit(x, y, objects);
+            }
+            else if (event.keyCode == "88"){
+                score += 50;
+                gameStartTime -= 50000;
             }
         });
 
