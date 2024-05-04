@@ -62,7 +62,8 @@
             </text>
         </svg>
     </div>
-
+<!-- 
+    <script src="/socket.io/socket.io.min.js"></script> -->
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
     <script src="bounding_box.js"></script>
     <script src="sprite.js"></script>
@@ -70,8 +71,8 @@
     <script src="game_object.js"></script>
     <script src="ability.js"></script>
     <script src="utility.js"></script>
-    <script>
 
+    <script>
     $(function() {
         //Get the canvas and 2D content
         const cv = $("canvas").get(0);
@@ -115,7 +116,7 @@
                 setTimeout(gameStartCountDown, 1000);
             }
         }
-        
+
         function checkFireHit(hitX, hitY, objectsList)
         {
             totalShot +=1;
@@ -164,10 +165,10 @@
             objects[2].update(now);
             abilitys[0].update(now);
             
-            randomization(objects);
-            randomization(abilitys);
+            Utility.randomization(objects);
+            Utility.randomization(abilitys);
             const {x, y} = (playerGun.getXY());
-            checkCollision(x,y, abilitys, playerGun);
+            Utility.checkCollision(x,y, abilitys, playerGun);
             context.clearRect(0, 0, cv.width, cv.height);
 
             objects[0].draw();
@@ -221,5 +222,7 @@
         gameStartCountDown();
     });
     </script>
+    <script src="socket.js"></script>
+
 </body>
 </html>

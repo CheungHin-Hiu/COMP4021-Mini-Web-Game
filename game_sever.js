@@ -1,5 +1,5 @@
 //Create exepress server
-const express = require("exepress");
+const express = require("express");
 
 //Create the express app
 const app = express();
@@ -29,9 +29,11 @@ io.on("connection", (socket) => {
     
     const socketID = socket.id;  //Access the scoket.id value
     if(gameRoom.length ==  0){
+        console.log("pushed first player");
         gameRoom.push(socketID);
     }
     else if(gameRoom.length == 1){
+        console.log("pushed second player");
         gameRoom.push(socketID);
         socket.broadcast.to(gameRoom[0]).emit("MatchFound", 0);
         socket.broadcast.to(gameRoom[1]).emit("MatchFound", 1);
