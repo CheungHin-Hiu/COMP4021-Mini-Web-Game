@@ -28,7 +28,7 @@
 
 
 
-        <svg xmlns="http://www.w3.org/2000/svg" id="game-start" display="none">
+        <svg xmlns="http://www.w3.org/2000/svg" id="game-start">
             <defs>
                 <linearGradient id="title-fill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset = "0%" stop-color="#D8B5FF"/>
@@ -54,6 +54,11 @@
                 Game End! Game
                 <tspan id="win-lose">draws</tspan>
                 !
+            </text>
+            <text x="50%" y = "60%">
+                Redirecting in
+                <tspan id="redirect-count">3</tspan>
+                Seconds
             </text>
         </svg>
     </div>
@@ -97,6 +102,19 @@
         objects[1].randomize(1);
         objects[2].randomize(2);
         abilitys[0].randomize();
+
+        function gameStartCountDown()
+        {
+            const num = $("#count-down").text();
+            if(num == 0){
+                $("#game-start").hide();
+                requestAnimationFrame(doFrame);
+            }
+            else{
+                $("#count-down").text(num - 1);
+                setTimeout(gameStartCountDown, 1000);
+            }
+        }
         
         function checkFireHit(hitX, hitY, objectsList)
         {
@@ -127,6 +145,7 @@
 
             if(timeRemaining <= 0)
             {
+                
                 $("#time-remaining").text(0);
                 if(score > enemyScore)
                     $("#win-lose").text("win");
@@ -199,9 +218,7 @@
                 playerGun.stop(4);
             }
         });
-
-        requestAnimationFrame(doFrame);
-
+        gameStartCountDown();
     });
     </script>
 </body>
