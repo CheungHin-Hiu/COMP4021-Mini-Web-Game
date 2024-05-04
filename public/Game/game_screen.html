@@ -75,25 +75,34 @@
     <script>
     $(function() {
         //Get the canvas and 2D content
+
         const cv = $("canvas").get(0);
         const context = cv.getContext("2d");
 
-        let gameStartTime = 0;
+        const Canvas = {
+            cv : cv,
+            context : context
+        }
 
-        let currentTime = 0;
 
-        let totalShot = 0;
-
-        let hitShot = 0;
+        const gameStats = 
+        {
+            gameStartTime: 0,   //Starting time of the game
+            currentTime: 0,     //Current time of the game
+            totalShot: 0,       //Total shot fired
+            hitShot: 0,         //Total shit hitted
+            score: 0,           //Current score 
+            enemyScore: 0       //Score of opponent
+        }
 
         const totalGameTime = 150;
 
-        let enemyScore = 0;
-        let score = 0;
-
         //Create the game area
         const gameArea = BoundingBox(context, 0, 0, 700, 1050);
-        const playerGun = Gun(context, 300, 350, gameArea);
+        
+        const gameGun = {
+           playerGun : Gun(context, 300, 350, gameArea)
+        }
         const objects = [GameObject(context, 0, 0, "gem"),
             GameObject(context, 0, 0, "gem"),
             GameObject(context, 0, 0, "gem")
@@ -103,8 +112,7 @@
         objects[1].randomize(1);
         objects[2].randomize(2);
         abilitys[0].randomize();
-
-        function gameStartCountDown()
+        const gameStartCountDown = function()
         {
             const num = $("#count-down").text();
             if(num == 0){
@@ -113,44 +121,44 @@
             }
             else{
                 $("#count-down").text(num - 1);
-                setTimeout(gameStartCountDown, 1000);
+                setTimeout(gameStartCountDown());
             }
         }
-
-        function checkFireHit(hitX, hitY, objectsList)
+        const checkFireHit = function(hitX, hitY, objectsList)
         {
-            totalShot +=1;
+            gameStats.totalShot +=1;
             for(let i = 0; i<objectsList.length; i++)
             {   
                 if(objectsList[i].getBoundingBox().isPointInBox(hitX,hitY))
                 {
-                    hitShot += 1;
-                    score += objectsList[i].rewardPoints();
-                    $("#your-score").text(String(score));
+                    gameStats.hitShot += 1;
+                    gameStats.score += objectsList[i].rewardPoints();
+                    $("#your-score").text(String(gameStats.score));
                     objectsList[i].randomize(i);
                 }
             }
-            $("#accuracy").text(String(Math.round(hitShot/totalShot * 100)) + "%");
+            $("#accuracy").text(String(Math.round(gameStats.hitShot/gameStats.totalShot * 100)) + "%");
         }
 
         function doFrame(now){
-            if (gameStartTime == 0) gameStartTime = now;
+            if (gameStats.gameStartTime == 0) gameStats.gameStartTime = now;
             
-            currentTime = now;
+
+            gameStats.currentTime = now;
             //Update the time remaining
-            const gameTimeSoFar = now - gameStartTime;
+            const gameTimeSoFar = now - gameStats.gameStartTime;
             const timeRemaining = Math.ceil((totalGameTime * 1000 - gameTimeSoFar) /1000);
 
             $("#time-remaining").text(timeRemaining);
-            $("#your-score").text(String(score));
+            $("#your-score").text(String(gameStats.score));
 
             if(timeRemaining <= 0)
             {
                 
                 $("#time-remaining").text(0);
-                if(score > enemyScore)
+                if(gameStats.score > gameStats.enemyScore)
                     $("#win-lose").text("win");
-                else if(score < enemyScore)
+                else if(gameStats.score < gameStats.enemyScore)
                     $("#win-lost").text("lose");
                 else
                     $("$win-lose").text("draw");
@@ -159,7 +167,7 @@
                 return;
             }
 
-            playerGun.update(now);
+            gameGun.playerGun.update(now);
             objects[0].update(now);
             objects[1].update(now);
             objects[2].update(now);
@@ -167,62 +175,62 @@
             
             Utility.randomization(objects);
             Utility.randomization(abilitys);
-            const {x, y} = (playerGun.getXY());
-            Utility.checkCollision(x,y, abilitys, playerGun);
-            context.clearRect(0, 0, cv.width, cv.height);
+            const {x, y} = (gameGun.playerGun.getXY());
+            Utility.checkCollision(x,y, abilitys,gameGun.playerGun);
+            Canvas.context.clearRect(0, 0, Canvas.cv.width, Canvas.cv.height);
 
             objects[0].draw();
             objects[1].draw();
             objects[2].draw();
             abilitys[0].draw();
-            playerGun.draw();
+            gameGun.playerGun.draw();
             requestAnimationFrame(doFrame);
         }
 
-
-
         $(document).on("keydown", function(event) {
             if(event.keyCode == "37"){
-                playerGun.move(1);
+                gameGun.playerGun.move(1);
             }
             else if(event.keyCode == "38"){
-                playerGun.move(2);
+                gameGun.playerGun.move(2);
             }
             else if(event.keyCode == "39"){
-                playerGun.move(3);
+                gameGun.playerGun.move(3);
             }
             else if (event.keyCode == "40"){
-                playerGun.move(4);
+                gameGun.playerGun.move(4);
             }
             else if (event.keyCode == "32"){
-                const {x, y} = playerGun.shoot(currentTime);
+                const {x, y} = gameGun.playerGun.shoot(gameStats.currentTime);
                 checkFireHit(x, y, objects);
             }
             else if (event.keyCode == "88"){
-                score += 50;
-                gameStartTime -= 50000;
+                gameStats.score += 50;
+                gameStats.gameStartTime -= 50000;
             }
         });
 
         /* Handle the keyup of arrow keys and spacebar */
         $(document).on("keyup", function(event) {
             if(event.keyCode == "37"){
-                playerGun.stop(1);
+                gameGun.playerGun.stop(1);
             }
             else if(event.keyCode == "38"){
-                playerGun.stop(2);
+                gameGun.playerGun.stop(2);
             }
             else if(event.keyCode == "39"){
-                playerGun.stop(3);
+                gameGun.playerGun.stop(3);
             }
             else if (event.keyCode == "40"){
-                playerGun.stop(4);
+                gameGun.playerGun.stop(4);
             }
         });
-        gameStartCountDown();
+
+        gameStartCountDown(doFrame);
     });
     </script>
     <script src="socket.js"></script>
+    
 
 </body>
 </html>
