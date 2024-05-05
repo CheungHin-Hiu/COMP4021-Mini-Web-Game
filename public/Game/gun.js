@@ -104,6 +104,7 @@ const Gun = function(ctx, x, y, gameArea)
         getBoundingBox: sprite.getBoundingBox,
         draw: sprite.draw,
         getXY: sprite.getXY,
+        setXY: sprite.setXY,
         update: update,
         shoot: shoot,
         shootSpeedUp: shootSpeedUp

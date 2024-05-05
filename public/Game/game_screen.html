@@ -21,7 +21,7 @@
                 Your Score:<tspan id ="your-score">0</tspan>
             </text>
             <text x="87%" y = "90%">
-                Enemy Score:<tspan id ="your-score">0</tspan>
+                Enemy Score:<tspan id ="enemy-score">0</tspan>
             </text>
             <text ></text>
         </svg>
@@ -62,8 +62,8 @@
             </text>
         </svg>
     </div>
-<!-- 
-    <script src="/socket.io/socket.io.min.js"></script> -->
+
+    
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
     <script src="bounding_box.js"></script>
     <script src="sprite.js"></script>
@@ -71,29 +71,33 @@
     <script src="game_object.js"></script>
     <script src="ability.js"></script>
     <script src="utility.js"></script>
+    <script src="/socket.io/socket.io.min.js"></script>
 
     <script>
+
     $(function() {
         //Get the canvas and 2D content
 
+        
         const cv = $("canvas").get(0);
         const context = cv.getContext("2d");
 
         const Canvas = {
             cv : cv,
             context : context
-        }
-
+        };
 
         const gameStats = 
         {
+            playerId: -1,       //The player id
             gameStartTime: 0,   //Starting time of the game
             currentTime: 0,     //Current time of the game
             totalShot: 0,       //Total shot fired
             hitShot: 0,         //Total shit hitted
             score: 0,           //Current score 
-            enemyScore: 0       //Score of opponent
-        }
+            enemyScore: 0,       //Score of opponent
+            timeRemaining: 150  //Remaining time of the game
+        };
 
         const totalGameTime = 150;
 
@@ -101,17 +105,20 @@
         const gameArea = BoundingBox(context, 0, 0, 700, 1050);
         
         const gameGun = {
-           playerGun : Gun(context, 300, 350, gameArea)
-        }
+           playerGun : Gun(context, 500, 350, gameArea),
+           enemyGun : Gun(context, 500, 350, gameArea)
+        };
+
         const objects = [GameObject(context, 0, 0, "gem"),
             GameObject(context, 0, 0, "gem"),
             GameObject(context, 0, 0, "gem")
-        ] ;
+        ];
         const abilitys = [Ability(context, 0, 0,"shootBoost")];
         objects[0].randomize(0);
         objects[1].randomize(1);
         objects[2].randomize(2);
         abilitys[0].randomize();
+
         const gameStartCountDown = function()
         {
             const num = $("#count-down").text();
@@ -123,36 +130,49 @@
                 $("#count-down").text(num - 1);
                 setTimeout(gameStartCountDown());
             }
-        }
+        };
+
         const checkFireHit = function(hitX, hitY, objectsList)
         {
             gameStats.totalShot +=1;
+            let awardPoints = 0;
+            let objectHitted = -1;
             for(let i = 0; i<objectsList.length; i++)
             {   
                 if(objectsList[i].getBoundingBox().isPointInBox(hitX,hitY))
                 {
+                    awardPoints = objectsList[i].rewardPoints();
                     gameStats.hitShot += 1;
-                    gameStats.score += objectsList[i].rewardPoints();
+                    gameStats.score += awardPoints;
+                    objectHitted = i;
                     $("#your-score").text(String(gameStats.score));
                     objectsList[i].randomize(i);
+                    break;
                 }
             }
             $("#accuracy").text(String(Math.round(gameStats.hitShot/gameStats.totalShot * 100)) + "%");
-        }
+            return {awardPoints, objectHitted};
+        };
 
         function doFrame(now){
             if (gameStats.gameStartTime == 0) gameStats.gameStartTime = now;
             
 
             gameStats.currentTime = now;
-            //Update the time remaining
-            const gameTimeSoFar = now - gameStats.gameStartTime;
-            const timeRemaining = Math.ceil((totalGameTime * 1000 - gameTimeSoFar) /1000);
 
-            $("#time-remaining").text(timeRemaining);
+
+            //Update the time remaining for player 0 and player 1
+            if(gameStats.playerId == 0){
+                const gameTimeSoFar = now - gameStats.gameStartTime;
+                gameStats.timeRemaining = Math.ceil((totalGameTime * 1000 - gameTimeSoFar) /1000);
+                timeSynchronization(gameStats.timeRemaining);
+            }
+
+            $("#time-remaining").text(gameStats.timeRemaining);
+
             $("#your-score").text(String(gameStats.score));
 
-            if(timeRemaining <= 0)
+            if(gameStats.timeRemaining <= 0)
             {
                 
                 $("#time-remaining").text(0);
@@ -167,7 +187,17 @@
                 return;
             }
 
+            //Update the gun of the player
             gameGun.playerGun.update(now);
+
+            //Send the player gun info to the server
+            const {x, y} = (gameGun.playerGun.getXY());
+            sendGraphicInfo(gameStats.playerId, x, y);
+
+            //Update the gun of the other player
+            gameGun.enemyGun.update(now);
+
+
             objects[0].update(now);
             objects[1].update(now);
             objects[2].update(now);
@@ -175,7 +205,6 @@
             
             Utility.randomization(objects);
             Utility.randomization(abilitys);
-            const {x, y} = (gameGun.playerGun.getXY());
             Utility.checkCollision(x,y, abilitys,gameGun.playerGun);
             Canvas.context.clearRect(0, 0, Canvas.cv.width, Canvas.cv.height);
 
@@ -184,6 +213,7 @@
             objects[2].draw();
             abilitys[0].draw();
             gameGun.playerGun.draw();
+            gameGun.enemyGun.draw();
             requestAnimationFrame(doFrame);
         }
 
@@ -202,7 +232,8 @@
             }
             else if (event.keyCode == "32"){
                 const {x, y} = gameGun.playerGun.shoot(gameStats.currentTime);
-                checkFireHit(x, y, objects);
+                const {awardPoints, objectHitted} = checkFireHit(x, y, objects);
+                fireEvent(gameStats.playerId, awardPoints, objectHitted);
             }
             else if (event.keyCode == "88"){
                 gameStats.score += 50;
@@ -226,10 +257,64 @@
             }
         });
 
-        gameStartCountDown(doFrame);
+        //This stores the current Socket.IO socket
+        let socket = null;
+
+        const connect = function(){
+            //Connect to the servver
+            socket = io();
+
+            socket.on("connect", () => {
+                console.log("connected sucessfully");
+            });
+
+            //Set up the matchFound event
+            socket.on("MatchFound", (id) => {
+                gameStats.playerId = id;
+                console.log("called");
+                gameStartCountDown();
+            });
+
+            //Set the the event when enemy hit a target
+            socket.on("enemy hit", (awardPoints, objectHitted) => {
+                console.log(awardPoints)
+                gameStats.enemyScore += awardPoints;
+                $("#enemy-score").text(String(gameStats.enemyScore));
+            });
+
+            //Update the enemy gun information
+            socket.on("graphic update", (enemyGunX, enemyGunY) => {
+                gameGun.enemyGun.setXY(enemyGunX, enemyGunY);
+            });
+
+            //Update the time information for player 1 to synchronize with player 0
+            socket.on("time update", (timeRemaining) => {
+                gameStats.timeRemaining = timeRemaining;
+                $("#time-remaining").text(timeRemaining);
+            })
+        };
+
+        const fireEvent = function(id, awardPoints, objectHitted){
+            if(objectHitted != -1){
+                socket.emit("fire event", id, awardPoints, objectHitted);
+            }
+        }
+
+        const sendGraphicInfo = function(id, gun_x, gun_y){
+            socket.emit("graphic info", id, gun_x, gun_y);
+        }
+
+        const timeSynchronization = function(timeRemaining){
+            socket.emit("time synchronzation", timeRemaining);
+        }
+ 
+
+        connect();
     });
+
+    
     </script>
-    <script src="socket.js"></script>
+
     
 
 </body>
