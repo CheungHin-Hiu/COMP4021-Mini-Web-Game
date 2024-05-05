@@ -70,7 +70,6 @@
     <script src="gun.js"></script>
     <script src="game_object.js"></script>
     <script src="ability.js"></script>
-    <script src="utility.js"></script>
     <script src="/socket.io/socket.io.min.js"></script>
 
     <script>
@@ -114,21 +113,22 @@
             GameObject(context, 0, 0, "gem")
         ];
         const abilitys = [Ability(context, 0, 0,"shootBoost")];
-        objects[0].randomize(0);
-        objects[1].randomize(1);
-        objects[2].randomize(2);
-        abilitys[0].randomize();
+        // objects[0].randomize(0);
+        // objects[1].randomize(1);
+        // objects[2].randomize(2);
+        // abilitys[0].randomize();
 
         const gameStartCountDown = function()
         {
             const num = $("#count-down").text();
+            console.log(num);
             if(num == 0){
                 $("#game-start").hide();
                 requestAnimationFrame(doFrame);
             }
             else{
                 $("#count-down").text(num - 1);
-                setTimeout(gameStartCountDown());
+                setTimeout(gameStartCountDown(), 1000);
             }
         };
 
@@ -155,8 +155,12 @@
         };
 
         function doFrame(now){
-            if (gameStats.gameStartTime == 0) gameStats.gameStartTime = now;
-            
+            if (gameStats.gameStartTime == 0 && gameStats.playerId == 0) 
+            {
+                gameStats.gameStartTime = now;
+                initialRandomization();
+            }
+
 
             gameStats.currentTime = now;
 
@@ -165,12 +169,13 @@
             if(gameStats.playerId == 0){
                 const gameTimeSoFar = now - gameStats.gameStartTime;
                 gameStats.timeRemaining = Math.ceil((totalGameTime * 1000 - gameTimeSoFar) /1000);
-                timeSynchronization(gameStats.timeRemaining);
+                timeSynchronization(gameStats.timeRemaining, gameStats.gameStartTime);
             }
 
             $("#time-remaining").text(gameStats.timeRemaining);
 
             $("#your-score").text(String(gameStats.score));
+            $("#enemy-score").text(String(gameStats.enemyScore));
 
             if(gameStats.timeRemaining <= 0)
             {
@@ -203,9 +208,12 @@
             objects[2].update(now);
             abilitys[0].update(now);
             
-            Utility.randomization(objects);
-            Utility.randomization(abilitys);
-            Utility.checkCollision(x,y, abilitys,gameGun.playerGun);
+            if(gameStats.playerId == 0)
+            {
+                randomizationObject(objects);
+                randomizationAbility(abilitys);
+            }
+            checkCollision(x,y, abilitys,gameGun.playerGun);
             Canvas.context.clearRect(0, 0, Canvas.cv.width, Canvas.cv.height);
 
             objects[0].draw();
@@ -236,8 +244,7 @@
                 fireEvent(gameStats.playerId, awardPoints, objectHitted);
             }
             else if (event.keyCode == "88"){
-                gameStats.score += 50;
-                gameStats.gameStartTime -= 50000;
+                useCheckCodeX();
             }
         });
 
@@ -265,19 +272,16 @@
             socket = io();
 
             socket.on("connect", () => {
-                console.log("connected sucessfully");
             });
 
             //Set up the matchFound event
             socket.on("MatchFound", (id) => {
                 gameStats.playerId = id;
-                console.log("called");
                 gameStartCountDown();
             });
 
             //Set the the event when enemy hit a target
-            socket.on("enemy hit", (awardPoints, objectHitted) => {
-                console.log(awardPoints)
+            socket.on("enemy hit", (awardPoints) => {
                 gameStats.enemyScore += awardPoints;
                 $("#enemy-score").text(String(gameStats.enemyScore));
             });
@@ -288,10 +292,38 @@
             });
 
             //Update the time information for player 1 to synchronize with player 0
-            socket.on("time update", (timeRemaining) => {
+            socket.on("time update", (timeRemaining, gameStartTime) => {
                 gameStats.timeRemaining = timeRemaining;
+                gameStats.gameStartTime = gameStartTime
                 $("#time-remaining").text(timeRemaining);
+            });
+
+            //Do the initial randomizationv of game object and ability
+            socket.on("randomization list", (randomizationList) => {
+                objects[randomizationList[0]].randomize(randomizationList[1], randomizationList[2], randomizationList[3]);
+                objects[randomizationList[4]].randomize(randomizationList[5], randomizationList[6], randomizationList[7]);
+                objects[randomizationList[8]].randomize(randomizationList[9], randomizationList[10], randomizationList[11]);
+                abilitys[0].randomize(randomizationList[12], randomizationList[23]);
+            });
+
+            socket.on("regenerate hitted object", (randomizationList) => {
+                objects[randomizationList[0]].randomize(randomizationList[1], randomizationList[2], randomizationList[3]);
+            });
+
+            socket.on("regenerate object", (randomizationList) => {
+                objects[randomizationList[0]].randomize(randomizationList[1], randomizationList[2], randomizationList[3]);
+            });
+
+            socket.on("regenerate ability", (randomizationList) => {
+                abilitys[0].randomize(randomizationList[0], randomizationList[1]);
+            });
+
+            socket.on("other player use x", () => {
+                gameStats.enemyScore += 100;
+                gameStats.gameStartTime -= 50000;
             })
+            
+
         };
 
         const fireEvent = function(id, awardPoints, objectHitted){
@@ -304,18 +336,58 @@
             socket.emit("graphic info", id, gun_x, gun_y);
         }
 
-        const timeSynchronization = function(timeRemaining){
-            socket.emit("time synchronzation", timeRemaining);
+        const timeSynchronization = function(timeRemaining, gameStartTime){
+            socket.emit("time synchronzation", timeRemaining, gameStartTime);
         }
  
+        const initialRandomization = function(){
+            socket.emit("initital randomization");
+        }
+
+        const randomizationObject = function(itemsList)
+        {
+            for(let i = 0; i < itemsList.length; i++){
+            let {x,y} = itemsList[i].getXY();
+            if(x <= -100 || x >= 1300 || y >= 900)
+                socket.emit("renew object", i);
+            }
+        }
+
+        const randomizationAbility = function(abilitysList)
+        {
+            for(let i = 0; i < abilitysList.length; i++){
+            let {x,y} = abilitysList[i].getXY();
+            if(x <= -100 || x >= 1300 || y >= 900)
+                socket.emit("renew ability", i);
+            }
+        }
+
+        const checkCollision = function(collideX, collideY, abilityList, gun)
+        {
+            for(let i = 0; i<abilityList.length; i++)
+            {   
+                if(abilityList[i].getBoundingBox().isPointInBox(collideX,collideY))
+                {
+                    const abilityType = abilityList[i].getAbilityType();
+                    if(abilityType == "shootBoost")
+                        gun.shootSpeedUp();
+                    else if(abilityType == "moveBoost")
+                        gun.speedUp();
+                        
+                    socket.emit("renew ability", i)
+                }
+            }
+        }
+
+        const useCheckCodeX = function()
+        {
+            gameStats.score += 100;
+            gameStats.gameStartTime -= 50000;
+            socket.emit("use cheat code x", gameStats.playerId);
+        }
 
         connect();
-    });
-
-    
+    }); 
     </script>
-
-    
-
 </body>
 </html>

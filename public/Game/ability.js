@@ -20,11 +20,11 @@ const Ability = function(ctx, x, y, boostType){
         
     };
 
-    const randomize = function(){
+    const randomize = function(boostTypeNum, randomX){
         const boostTypes = ["shootBoost", "moveBoost"];
-        setBoostType(boostTypes[Math.floor(Math.random() * 2)]);
+        setBoostType(boostTypes[boostTypeNum]);
 
-        const x = Math.floor(Math.random()* 800 + 100);
+        const x = randomX;
         const y = -100;
         
         sprite.setXY(x, y);

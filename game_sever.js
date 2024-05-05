@@ -44,7 +44,15 @@ io.on("connection",
     //This event tells the opponent that another player have hitted the object i
     socket.on("fire event", (playerId, awardPoints, objectHitted) => 
     {
-        io.to(gameRoom[(playerId + 1) % 2]).emit("enemy hit", awardPoints, objectHitted);
+        let randomizationList = [];
+        randomizationList.push(objectHitted);
+        randomizationList.push(Math.floor(Math.random() *4));
+        randomizationList.push(Math.floor(Math.random() *2));
+        randomizationList.push(objectHitted);
+        io.to(gameRoom[(playerId + 1) % 2]).emit("enemy hit", awardPoints);
+
+        io.to(gameRoom[0]).emit("regenerate hitted object", randomizationList);
+        io.to(gameRoom[1]).emit("regenerate hitted object", randomizationList);
     });
 
     //This event updates the enemyGun image of the opponent
@@ -53,11 +61,48 @@ io.on("connection",
     });
 
     //This event synchronize the time of 
-    socket.on("time synchronzation", (timeRemaining) =>
+    socket.on("time synchronzation", (timeRemaining, gameStartTime) =>
     {
-        socket.to(gameRoom[1]).emit("time update", timeRemaining);
+        io.to(gameRoom[1]).emit("time update", timeRemaining, gameStartTime);
     })
 
+    //Initialization of game object and ability
+    socket.on("initital randomization", () => {
+        let randomizationList = [];
+        for(let i = 0; i < 3 ; i++){
+            randomizationList.push(i);
+            randomizationList.push(Math.floor(Math.random() *4));
+            randomizationList.push(Math.floor(Math.random() *2));
+            randomizationList.push(i);
+        }
+        randomizationList.push(Math.floor(Math.random() *2));
+        randomizationList.push(Math.floor(Math.random() * 800 + 100));
+
+        io.to(gameRoom[0]).emit("randomization list", randomizationList);
+        io.to(gameRoom[1]).emit("randomization list", randomizationList);
+    });
+
+    socket.on("renew object", (i) => {
+        let randomizationList = [];
+        randomizationList.push(i);
+        randomizationList.push(Math.floor(Math.random() *4));
+        randomizationList.push(Math.floor(Math.random() *2));
+        randomizationList.push(i);
+        io.to(gameRoom[0]).emit("regenerate object", randomizationList);
+        io.to(gameRoom[1]).emit("regenerate object", randomizationList);
+    });
+
+    socket.on("renew ability", (i) => {
+        let randomizationList = [];
+        randomizationList.push(Math.floor(Math.random() *2));
+        randomizationList.push(Math.floor(Math.random() * 800 + 100));
+        io.to(gameRoom[0]).emit("regenerate ability", randomizationList);
+        io.to(gameRoom[1]).emit("regenerate ability", randomizationList);
+    });
+
+    socket.on("use cheat code x", (i) => {
+        io.to(gameRoom[(i + 1) % 2]).emit("other player use x");
+    });
     
 
 

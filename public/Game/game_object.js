@@ -9,7 +9,10 @@ const GameObject = function(ctx, x, y, type) {
         bomb: {x:64, y:112, width: 16, height: 16, count: 9, timing: 350, loop: true}
     };
 
-
+    const types = ["gem", "ring", "spider", "bomb"];
+    const spawnX = [-50, 1250];
+    const spawnY = [100, 300, 500];
+    
     let direction = -1;
 
     let objectType = "null";
@@ -40,15 +43,12 @@ const GameObject = function(ctx, x, y, type) {
         }
     }
 
-    const randomize = function(random_y){
+    const randomize = function(objectType, randomX, randomY){
         //Radomize the type of object
-        const types = ["gem", "ring", "spider", "bomb"];
-        const spawnX = [-50, 1250];
-        const spawnY = [100, 300, 500]
-        setType(types[Math.floor(Math.random() * 4)]);
+        setType(types[objectType]);
 
-        const x = spawnX[Math.floor(Math.random() * 2)];
-        const y = spawnY[random_y];
+        const x = spawnX[randomX];
+        const y = spawnY[randomY];
         sprite.setXY(x,y);
 
         if(x == -50)
