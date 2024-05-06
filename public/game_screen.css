@@ -4,12 +4,12 @@ body {
 #game-container {
     position: relative;
 }
-canvas, #counter, #game-start, #game-over {
+canvas, #counter, #game-start, #game-over, #waiting {
     position: absolute;
     top: 0px;
     left: 0px;
 }
-canvas, #game-start, #game-over {
+canvas, #game-start, #game-over, #waiting{
     border: 12px solid gray;
     width: 1050px;
     height: 700px;
@@ -22,7 +22,7 @@ canvas {
     background: url(background_resize.png);
     background-size: cover;
 }
-#game-start, #game-over {
+#game-start, #game-over, #waiting{
     background: rgba(1, 1, 1, 0.8);
 }
 #counter text {
@@ -30,6 +30,12 @@ canvas {
     fill: white;
     stroke: black;
     stroke-width: 1px;
+    text-anchor: middle;
+}
+
+#waiting text {
+    font-size: 150%;
+    fill: url(#title-fill);
     text-anchor: middle;
 }
 
