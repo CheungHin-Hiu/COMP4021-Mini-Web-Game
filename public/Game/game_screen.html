@@ -75,17 +75,17 @@
     <script>
 
     $(function() {
-        //Get the canvas and 2D content
-
-        
+        //Get the canvas and 2D content        
         const cv = $("canvas").get(0);
         const context = cv.getContext("2d");
 
+        //Stores the canvas and 2D content in an object
         const Canvas = {
             cv : cv,
             context : context
         };
 
+        //Stores the useful game statisitcs
         const gameStats = 
         {
             roomNo: -1,
@@ -96,34 +96,45 @@
             hitShot: 0,         //Total shit hitted
             score: 0,           //Current score 
             enemyScore: 0,       //Score of opponent
-            timeRemaining: 150  //Remaining time of the game
+            timeRemaining: 120  //Remaining time of the game
         };
 
-        const totalGameTime = 150;
+        const sounds = {
+            background: new Audio("background_music.mp3"),
+            gameEnd: new Audio("gameover.mp3"),
+            fire: new Audio("gun-fire.mp3"),
+            ability: new Audio("ability1.mp3"),
+            hit: new Audio("collect.mp3")
+        }
+        //Total play time of the game
+        const totalGameTime = 120;
 
         //Create the game area
         const gameArea = BoundingBox(context, 0, 0, 700, 1050);
         
+        //The player and the opponent's gun
         const gameGun = {
            playerGun : Gun(context, 500, 350, gameArea),
            enemyGun : Gun(context, 500, 350, gameArea)
         };
 
+        //Game objects in the game
         const objects = [GameObject(context, 0, 0, "gem"),
             GameObject(context, 0, 0, "gem"),
             GameObject(context, 0, 0, "gem")
         ];
-        const abilitys = [Ability(context, 0, 0,"shootBoost")];
-        // objects[0].randomize(0);
-        // objects[1].randomize(1);
-        // objects[2].randomize(2);
-        // abilitys[0].randomize();
 
+        //Ability in the game
+        const abilitys = [Ability(context, 0, 0,"shootBoost")];
+
+        //Functions to start the countdown after matched with an opponent (by server)
         const gameStartCountDown = function()
         {
             const num = $("#count-down").text();
             if(num == 0){
                 $("#game-start").hide();
+                sounds.background.autoplay = false;
+                sounds.background.play();
                 requestAnimationFrame(doFrame);
             }
             else{
@@ -132,6 +143,7 @@
             }
         };
 
+        //Function to check if the shoot hit any game object
         const checkFireHit = function(hitX, hitY, objectsList)
         {
             gameStats.totalShot +=1;
@@ -141,12 +153,14 @@
             {   
                 if(objectsList[i].getBoundingBox().isPointInBox(hitX,hitY))
                 {
+                    sounds.hit.currentTime = 0;
+                    sounds.hit.play();
                     awardPoints = objectsList[i].rewardPoints();
                     gameStats.hitShot += 1;
                     gameStats.score += awardPoints;
                     objectHitted = i;
                     $("#your-score").text(String(gameStats.score));
-                    objectsList[i].randomize(i);
+                
                     break;
                 }
             }
@@ -154,6 +168,7 @@
             return {awardPoints, objectHitted};
         };
 
+        //Draw on the game
         function doFrame(now){
             if (gameStats.gameStartTime == 0 && gameStats.playerId == 0) 
             {
@@ -179,7 +194,8 @@
 
             if(gameStats.timeRemaining <= 0)
             {
-                
+                sounds.background.pause();
+                sounds.gameEnd.play();
                 $("#time-remaining").text(0);
                 if(gameStats.score > gameStats.enemyScore){
                     $("#win-lose").text("win");
@@ -228,6 +244,7 @@
             requestAnimationFrame(doFrame);
         }
 
+        //Keydown function
         $(document).on("keydown", function(event) {
             if(event.keyCode == "37"){
                 gameGun.playerGun.move(1);
@@ -242,6 +259,8 @@
                 gameGun.playerGun.move(4);
             }
             else if (event.keyCode == "32"){
+                sounds.fire.currentTime = 0;
+                sounds.fire.play();
                 const {x, y} = gameGun.playerGun.shoot(gameStats.currentTime);
                 const {awardPoints, objectHitted} = checkFireHit(x, y, objects);
                 fireEvent(gameStats.playerId, awardPoints, objectHitted);
@@ -254,7 +273,7 @@
             }
         });
 
-        /* Handle the keyup of arrow keys and spacebar */
+        //Key up funciton
         $(document).on("keyup", function(event) {
             if(event.keyCode == "37"){
                 gameGun.playerGun.stop(1);
@@ -273,6 +292,7 @@
         //This stores the current Socket.IO socket
         let socket = null;
 
+        //Handle with the connection with the server
         const connect = function(){
             //Connect to the servver
             socket = io();
@@ -280,6 +300,7 @@
             socket.on("connect", () => {
             });
 
+            //Receive the room no and correspoding playerID (0 or 1) from server
             socket.on("entered room", (roomNo, playerId) => {
                 gameStats.roomNo = roomNo;
                 gameStats.playerId = playerId;
@@ -322,18 +343,22 @@
                 abilitys[0].randomize(randomizationList[12], randomizationList[23]);
             });
 
+            //Regenerate the hitted traget
             socket.on("regenerate hitted object", (randomizationList) => {
                 objects[randomizationList[0]].randomize(randomizationList[1], randomizationList[2], randomizationList[3]);
             });
 
+            //Regenerate object that go out of bound
             socket.on("regenerate object", (randomizationList) => {
                 objects[randomizationList[0]].randomize(randomizationList[1], randomizationList[2], randomizationList[3]);
             });
 
+            //Regenerate ability that go out of bound
             socket.on("regenerate ability", (randomizationList) => {
                 abilitys[0].randomize(randomizationList[0], randomizationList[1]);
             });
 
+            //Receive info that other player use cheat code x
             socket.on("other player use x", (playerId) => {
                 if(gameStats.playerId != playerId){
                     gameStats.enemyScore += 100;
@@ -341,6 +366,7 @@
                 }
             });
 
+            //Receive info that other player use cheat code z
             socket.on("other player use z", (playerId) => {
                 if(gameStats.playerId != playerId){
                     gameGun.playerGun.disableMove();
@@ -348,6 +374,7 @@
                 }
             });
 
+            //Redirection to the game ending page
             socket.on("redirection to game ending screen", (gameOverRedirectionURL) => {
                 window.location.href = gameOverRedirectionURL;
             });
@@ -355,24 +382,29 @@
 
         };
 
+        //Inform the server that an object was hitted
         const fireEvent = function(id, awardPoints, objectHitted){
             if(objectHitted != -1){
                 socket.emit("fire event", gameStats.roomNo, id, awardPoints, objectHitted);
             }
         }
 
+        //Send current graphical info of the gun to server
         const sendGraphicInfo = function(id, gun_x, gun_y){
             socket.emit("graphic info", gameStats.roomNo, id, gun_x, gun_y);
         }
 
+        //Player 0 will tell server its current game time to synchronize the time of player 1
         const timeSynchronization = function(timeRemaining, gameStartTime){
             socket.emit("time synchronzation", gameStats.roomNo, gameStats.playerId, timeRemaining, gameStartTime);
         }
- 
+        
+        //Tell the server to generate objects and abilitys randonly
         const initialRandomization = function(){
             socket.emit("initital randomization", gameStats.roomNo);
         }
 
+        //Tell the server to randonly generate the object/ability if they go out of bound
         const randomizationObject = function(itemsList)
         {
             for(let i = 0; i < itemsList.length; i++){
@@ -391,6 +423,7 @@
             }
         }
 
+        //Check if the player hitted with the ability
         const checkCollision = function(collideX, collideY, abilityList, gun)
         {
             for(let i = 0; i<abilityList.length; i++)
@@ -402,12 +435,15 @@
                         gun.shootSpeedUp();
                     else if(abilityType == "moveBoost")
                         gun.speedUp();
-                        
+                    
+                    sounds.ability.currentTime = 0;
+                    sounds.ability.play();
                     socket.emit("renew ability", gameStats.roomNo, i);
                 }
             }
         }
 
+        //Inform the server that cheat code x is used
         const useCheatCodeX = function()
         {
             gameStats.score += 100;
@@ -415,10 +451,12 @@
             socket.emit("use cheat code x", gameStats.roomNo, gameStats.playerId);
         }
 
+        //Inform the server that cheat code z is used
         const useCheatCodeZ = function(){
             socket.emit("use cheat code z", gameStats.roomNo, gameStats.playerId);
         }
 
+        //Inform the server that the game has ended and should redirect to the new screen
         const redirectionToGameEnd = function(){
             socket.emit("game end");
         }
