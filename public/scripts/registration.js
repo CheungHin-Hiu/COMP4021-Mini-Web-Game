@@ -68,6 +68,7 @@ $(function(){
                     if(onSuccess){
                         onSuccess(); // this will output you can sign in now
                     }
+                    window.location.href = "./signin.html";
                 }
             }) 
      
