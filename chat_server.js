@@ -78,7 +78,7 @@ app.post("/register", (req, res) => {
     // G. Adding the new user account
     //
     password = bcrypt.hashSync(password, 10);
-    users[username] = { password, highestScore : 0};
+    users[username] = { password, highestScore : 0, gamePlayed: 0, gameWon: 0};
     //
     // H. Saving the users.json file
     //
@@ -126,7 +126,7 @@ app.post("/signin", (req, res) => {
     // G. Sending a success response with the user account
     //
     console.log("sign in success")
-    const userObj = { username, highestScore: users[username].highestScore};
+    const userObj = { username, highestScore: users[username].highestScore, gamePlayed: users[username].gamePlayed, gameWon: users[username].gameWon};
     req.session.user = userObj;
     console.log("userObj",userObj)
     res.json({ status: "success", user: userObj});
