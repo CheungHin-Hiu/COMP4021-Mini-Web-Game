@@ -26,8 +26,17 @@
             <text ></text>
         </svg>
 
+        <svg xmlns="http://www.w3.org/2000/svg" id="waiting">
+            <defs>
+                <linearGradient id="title-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset = "0%" stop-color="#D8B5FF"/>
+                    <stop offset = "100%" stop-color="#1EAE98"/>
+                </linearGradient>
+            </defs>
+            <text id = "waiting-for-player" x = "50%" y = "45%">Waiting for Other Player!</text>
+        </svg>
 
-        <svg xmlns="http://www.w3.org/2000/svg" id="game-start">
+        <svg xmlns="http://www.w3.org/2000/svg" id="game-start" display="none">
             <defs>
                 <linearGradient id="title-fill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset = "0%" stop-color="#D8B5FF"/>
@@ -105,10 +114,10 @@
             ability: new Audio("ability1.mp3"),
             hit: new Audio("collect.mp3")
         }
-        sounds.background.volume = 0.5;
-        sounds.gameEnd.volume = 0.5;
-        sounds.ability.volume = 0.5;
-        sounds.hit.volume = 0.5;
+        sounds.background.volume = 0.2;
+        sounds.gameEnd.volume = 0.2;
+        sounds.ability.volume = 0.2;
+        sounds.hit.volume = 0.2;
         //Total play time of the game
         const totalGameTime = 120;
 
@@ -133,6 +142,8 @@
         //Functions to start the countdown after matched with an opponent (by server)
         const gameStartCountDown = function()
         {
+            $("#waiting").hide();
+            $("#game-start").show();
             const num = $("#count-down").text();
             if(num == 0){
                 $("#game-start").hide();
