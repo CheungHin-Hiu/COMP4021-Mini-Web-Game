@@ -27,7 +27,6 @@
         </svg>
 
 
-
         <svg xmlns="http://www.w3.org/2000/svg" id="game-start">
             <defs>
                 <linearGradient id="title-fill" x1="0" y1="0" x2="0" y2="1">
@@ -65,12 +64,12 @@
 
     
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
-    <script src="bounding_box.js"></script>
-    <script src="sprite.js"></script>
-    <script src="gun.js"></script>
-    <script src="game_object.js"></script>
-    <script src="ability.js"></script>
-    <script src="/socket.io/socket.io.min.js"></script>
+    <script src="./scripts/bounding_box.js"></script>
+    <script src="./scripts/sprite.js"></script>
+    <script src="./scripts/gun.js"></script>
+    <script src="./scripts/game_object.js"></script>
+    <script src="./scripts/ability.js"></script>
+    <script src="socket.io/socket.io.min.js"></script>
 
     <script>
 
@@ -106,6 +105,10 @@
             ability: new Audio("ability1.mp3"),
             hit: new Audio("collect.mp3")
         }
+        sounds.background.volume = 0.5;
+        sounds.gameEnd.volume = 0.5;
+        sounds.ability.volume = 0.5;
+        sounds.hit.volume = 0.5;
         //Total play time of the game
         const totalGameTime = 120;
 
