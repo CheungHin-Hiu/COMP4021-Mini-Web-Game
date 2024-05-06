@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Main Menu</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="../main_menu.css" rel="stylesheet">
+</head>
+<body>
+    <div id = "game-container">
+        <canvas width = "1050px" height="700px"></canvas>
+        <div id="start-menu">
+            <div class="row">
+                <div id="username"></div>
+                <button id="signout-button" class="icon"><span class="material-icons">logout</span></button>
+            </div>
+            <div class="center-container">
+                <h1>Leaderboard screen</h1>
+            </div>
+            
+        </div>
+    </div>
+    <script src="./scripts/authentication.js"></script>
+    <script>
+         $(function () {
+            let user = null;
+
+            Authentication.validate(
+                () => {
+                    const { username } = Authentication.getUser();
+                    $("#username").text(`Welcome back, ${username}`)
+                },
+                () => { window.location.href = "./index.html";}
+            ); // validate the if that player have sign into the session already
+            
+            $("#signout-button").click(function(){
+                Authentication.signout();
+                window.location.href = "./index.html";
+            })
+        })
+    </script>
+</body>
+</html>

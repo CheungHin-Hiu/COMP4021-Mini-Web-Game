@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Main Menu</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="../main_menu.css" rel="stylesheet">
+</head>
+<body>
+    <div id = "game-container">
+        <canvas width = "1050px" height="700px"></canvas>
+        <div id="start-menu">
+            <div class="row">
+                <div id="username"></div>
+                <button id="signout-button" class="icon"><span class="material-icons">logout</span></button>
+            </div>
+            <div class="center-container">
+                <a class="body-text" href="./start.html">Start</a>
+                <a class="body-text" href="./leaderboard.html">Leaderboard</a>
+            </div>
+            
+        </div>
+    </div>
+    <script src="./scripts/authentication.js"></script>
+    <script>
+         $(function () {
+            let user = null;
+
+            Authentication.validate(
+                () => {
+                    const { username } = Authentication.getUser();
+                    $("#username").text(`Welcome back, ${username}`)
+                },
+                () => { window.location.href = "./index.html";}
+            ); // validate the if that player have sign into the session already
+            
+            $("#signout-button").click(function(){
+                Authentication.signout();
+                window.location.href = "./index.html";
+            })
+
+            const links = $('.center-container a');
+            let currentIndex = 0;
+
+            // Focus the first link initially
+            links.eq(currentIndex).focus().css("color", "orange");
+
+            $(document).on('keydown', function (event) {
+                if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                    event.preventDefault(); // Prevent scrolling
+
+                    // Remove focus from the current link
+                    links.eq(currentIndex).blur().css("color", "white");
+
+                    // Move to the next or previous link
+                    if (event.key === 'ArrowUp') {
+                        currentIndex = (currentIndex - 1 + links.length) % links.length;
+                    } else {
+                        currentIndex = (currentIndex + 1) % links.length;
+                    }
+
+                    // Focus the new link
+                    links.eq(currentIndex).focus().css("color", "orange");
+                } else if (event.key === 'Enter') {
+                    event.preventDefault(); // Prevent the default link behavior
+                    const link = links.eq(currentIndex).attr('href');
+                    window.location.href = link; // Navigate to the selected link
+                }
+            });
+        })
+    </script>
+</body>
+</html>

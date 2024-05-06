@@ -1,0 +1,112 @@
+body {
+    font-family: "Press Start 2P", sans-serif;
+    color: white;
+}
+
+ul {
+    list-style-type: none;
+}
+
+
+#game-container {
+    position: relative;
+}
+canvas, #menu, #start-menu{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+canvas, #menu, #start-menu {
+    border: 12px solid gray;
+    width: 1050px;
+    height: 700px;
+}
+
+canvas {
+    background: url(background_resize.png);
+    background-size: cover;
+}
+
+#menu {
+    background: rgba(1, 1, 1, 0.6);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#start-menu {
+    background: rgba(1, 1, 1, 0.6);
+    display: flex;
+    flex-direction: column;
+    
+}
+
+a {
+    display: block;
+    color: white;
+    text-decoration: none;
+}
+
+
+.col{
+    display: flex;
+    flex-direction: column;
+}
+
+.title-text{
+    font-size: large;
+    margin: 10px 0px 30px;
+
+}
+
+.body-text {
+    margin: 10px 0px 10px;
+}
+
+.row{
+    margin: 10px 10px 10px 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.center-container{
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+input, select {
+    font-size: 0.8rem;
+    background: var(--input-background);
+    /* border: none; */
+    border-radius: 20px;
+    padding: 10px 15px;
+    color: white;
+}
+
+button {
+    font-weight: bold;
+    height: 40px;
+    border: 1px solid black;
+    color: var(--button-color);
+    background: var(--button-background);
+    box-shadow: 2px 2px 2px rgb(0, 0, 0, 0.4);
+    padding: 0 20px;
+    transition: 1s background;
+    cursor: pointer;
+}
+button:hover {
+    background: var(--button-background-hover);
+}
+button:active {
+    margin: 2px -2px -2px 2px;
+    box-shadow: 0px 0px;
+}
+
+#register-message{
+    word-wrap: break-word;
+}

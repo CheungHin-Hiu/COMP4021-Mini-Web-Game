@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Main Menu</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P" rel="stylesheet">
+    <link href="../main_menu.css" rel="stylesheet">
+</head>
+<body>
+    <div id = "game-container">
+        <canvas width = "1050px" height="700px"></canvas>
+        <div id="menu">
+            <form id="register-form" class="col">
+                <div class="caption title-text">Registration</div>
+                <input class="body-text" id="register-username" maxlength="10" placeholder="Enter your username"></input>
+            
+                <input class="body-text" id="register-password" type="password" placeholder="Enter your password"></input>
+                <input class="body-text" id="register-confirm" type="password" placeholder="Enter your password again"></input>
+                <div class="spacer-0"></div>
+                <button type="submit">Register</button>
+                <div id="register-message" class="warning center"></div>
+            </form>
+        </div>
+    </div>
+    <script src="./scripts/registration.js"></script>
+</body>
+
+</html>

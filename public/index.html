@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Main Menu</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P" rel="stylesheet">
+    <link href="main_menu.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="game-container">
+        <canvas width="1050px" height="700px"></canvas>
+
+        <div id="menu">
+            <div class="title-text" id="menu-text" class="warning center"></div>
+
+
+            <a href="registration.html" class="body-text" id="registration">Registration</a><br>
+            <a href="signin.html" class="body-text" id="sigin">Sign-in</a><br>
+            <a href="instruction.html" class="body-text" id="instruction">Instruction</a><br>
+
+
+        </div>
+    </div>
+
+    <script src="./scripts/authentication.js"></script>
+    <script>
+        $(function () {
+            let user = null;
+
+            Authentication.validate(
+                () => {
+                    const { username } = Authentication.getUser();
+                    $("#menu-text").text(`session sign in: ${username}`)
+                    window.location.href = "./main_screen.html";
+                },
+                () => { $("#menu-text").text("Please sign in or register")}
+            ); // validate the if that player have sign into the session already
+
+            const links = $('#menu a');
+            let currentIndex = 0;
+
+            // Focus the first link initially
+            links.eq(currentIndex).focus().css("color", "orange");
+
+            $(document).on('keydown', function (event) {
+                if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                    event.preventDefault(); // Prevent scrolling
+
+                    // Remove focus from the current link
+                    links.eq(currentIndex).blur().css("color", "white");
+
+                    // Move to the next or previous link
+                    if (event.key === 'ArrowUp') {
+                        currentIndex = (currentIndex - 1 + links.length) % links.length;
+                    } else {
+                        currentIndex = (currentIndex + 1) % links.length;
+                    }
+
+                    // Focus the new link
+                    links.eq(currentIndex).focus().css("color", "orange");
+                } else if (event.key === 'Enter') {
+                    event.preventDefault(); // Prevent the default link behavior
+                    const link = links.eq(currentIndex).attr('href');
+                    window.location.href = link; // Navigate to the selected link
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
