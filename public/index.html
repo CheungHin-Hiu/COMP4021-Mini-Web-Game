@@ -31,7 +31,8 @@
 
             Authentication.validate(
                 () => {
-                    const { username } = Authentication.getUser();
+                    const { username, gamePlayed, gameWon } = Authentication.getUser();
+
                     $("#menu-text").text(`session sign in: ${username}`)
                     window.location.href = "./main_screen.html";
                 },
