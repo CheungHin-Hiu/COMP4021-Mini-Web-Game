@@ -16,15 +16,14 @@ const {Server} = require("socket.io");
 const httpServer = createServer(app);
 const io = new Server(httpServer);
 
-//Objects storing the online players
-const onlineUsers = {};
-
-// //The game room pairing up the players
-// let gameRoom = [];
-
+//Storing the total user connected to the server
 let userNo = 0;
 
+//Storing the game room #
 let gameRoomNo;
+
+//URL for the game ending screen
+const gameOverRedirectionURL = "game_over.html";
 
 //Adding a new user to the online user list when the player connects to the WebSocket server
 io.on("connection", (socket) => {
@@ -32,7 +31,7 @@ io.on("connection", (socket) => {
     userNo++;
     gameRoomNo = Math.round(userNo / 2);
     socket.join(gameRoomNo);
-    const socketID = socket.id;  //Access the scoket.id value
+  
     if(userNo % 2 == 1){
         socket.emit("entered room", gameRoomNo, 0);
     }
@@ -81,6 +80,7 @@ io.on("connection", (socket) => {
         io.to(roomNo).emit("randomization list", randomizationList);
     });
 
+    //Regenerate new object
     socket.on("renew object", (roomNo, i) => {
         let randomizationList = [];
         randomizationList.push(i);
@@ -90,6 +90,7 @@ io.on("connection", (socket) => {
         io.to(roomNo).emit("regenerate object", randomizationList);
     });
 
+    //Regenerate new ability
     socket.on("renew ability", (roomNo, i) => {
         let randomizationList = [];
         randomizationList.push(Math.floor(Math.random() *2));
@@ -97,15 +98,19 @@ io.on("connection", (socket) => {
         io.to(roomNo).emit("regenerate ability", randomizationList);
     });
 
+    //Notify players that cheat code x (+points and decrease game time)was used
     socket.on("use cheat code x", (roomNo, playerId) => {
         io.to(roomNo).emit("other player use x", playerId);
     });
 
+    //Notify players that cheat code z (stop other from moving) is used
     socket.on("use cheat code z", (roomNo, playerId) => {
         io.to(roomNo).emit("other player use z", playerId);
-    })
+    });
     
-
+    socket.on("game end", () => {
+        socket.emit("redirection to game ending screen", gameOverRedirectionURL);
+    });
 
 });
 

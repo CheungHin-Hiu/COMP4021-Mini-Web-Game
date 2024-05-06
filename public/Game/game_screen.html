@@ -122,7 +122,6 @@
         const gameStartCountDown = function()
         {
             const num = $("#count-down").text();
-            console.log(num);
             if(num == 0){
                 $("#game-start").hide();
                 requestAnimationFrame(doFrame);
@@ -182,14 +181,17 @@
             {
                 
                 $("#time-remaining").text(0);
-                if(gameStats.score > gameStats.enemyScore)
+                if(gameStats.score > gameStats.enemyScore){
                     $("#win-lose").text("win");
-                else if(gameStats.score < gameStats.enemyScore)
-                    $("#win-lost").text("lose");
-                else
+                }
+                else if(gameStats.enemyScore > gameStats.score){
+                    $("#win-lose").text("lose");
+                }
+                else{
                     $("$win-lose").text("draw");
+                }
                 $("#game-over").show();
-                setTimeout(() => {location.href = "/Project/public/Game/game_over.html"}, 3000);
+                setTimeout(redirectionToGameEnd, 3000);
                 return;
             }
 
@@ -281,7 +283,8 @@
             socket.on("entered room", (roomNo, playerId) => {
                 gameStats.roomNo = roomNo;
                 gameStats.playerId = playerId;
-            })
+            });
+
             //Set up the matchFound event
             socket.on("MatchFound", () => {
                 gameStartCountDown();
@@ -343,7 +346,11 @@
                     gameGun.playerGun.disableMove();
                     setTimeout(gameGun.playerGun.enableMove, 10000);
                 }
-            })
+            });
+
+            socket.on("redirection to game ending screen", (gameOverRedirectionURL) => {
+                window.location.href = gameOverRedirectionURL;
+            });
             
 
         };
@@ -410,6 +417,10 @@
 
         const useCheatCodeZ = function(){
             socket.emit("use cheat code z", gameStats.roomNo, gameStats.playerId);
+        }
+
+        const redirectionToGameEnd = function(){
+            socket.emit("game end");
         }
 
         connect();
