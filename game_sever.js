@@ -19,55 +19,55 @@ const io = new Server(httpServer);
 //Objects storing the online players
 const onlineUsers = {};
 
-//The game room pairing up the players
-let gameRoom = [];
+// //The game room pairing up the players
+// let gameRoom = [];
 
-//The pending list of the player
-let pendingList = [];
+let userNo = 0;
+
+let gameRoomNo;
+
 //Adding a new user to the online user list when the player connects to the WebSocket server
-io.on("connection", 
-(socket) => {
+io.on("connection", (socket) => {
     
+    userNo++;
+    gameRoomNo = Math.round(userNo / 2);
+    socket.join(gameRoomNo);
     const socketID = socket.id;  //Access the scoket.id value
-    if(gameRoom.length ==  0){
-        gameRoom.push(socketID);
+    if(userNo % 2 == 1){
+        socket.emit("entered room", gameRoomNo, 0);
     }
-    else if(gameRoom.length == 1){
-        gameRoom.push(socketID);
-        io.to(gameRoom[0]).emit("MatchFound", 0);
-        io.to(gameRoom[1]).emit("MatchFound", 1);
+    else if(userNo % 2 == 0){
+        socket.emit("entered room", gameRoomNo, 1)
+        io.to(gameRoomNo).emit("MatchFound");
     }
-    else{
-        pendingList.push(socketID);
-    }
+
 
     //This event tells the opponent that another player have hitted the object i
-    socket.on("fire event", (playerId, awardPoints, objectHitted) => 
+    socket.on("fire event", (roomNo, playerId, awardPoints, objectHitted) => 
     {
         let randomizationList = [];
         randomizationList.push(objectHitted);
         randomizationList.push(Math.floor(Math.random() *4));
         randomizationList.push(Math.floor(Math.random() *2));
         randomizationList.push(objectHitted);
-        io.to(gameRoom[(playerId + 1) % 2]).emit("enemy hit", awardPoints);
+        io.to(roomNo).emit("enemy hit", playerId, awardPoints);
 
-        io.to(gameRoom[0]).emit("regenerate hitted object", randomizationList);
-        io.to(gameRoom[1]).emit("regenerate hitted object", randomizationList);
+        io.to(roomNo).emit("regenerate hitted object", randomizationList);
     });
 
     //This event updates the enemyGun image of the opponent
-    socket.on("graphic info", (playerId, gun_x, gun_y) => {
-        io.to(gameRoom[(playerId + 1) % 2]).emit("graphic update", gun_x, gun_y);
+    socket.on("graphic info", (roomNo, playerId, gun_x, gun_y) => {
+        io.to(roomNo).emit("graphic update", playerId, gun_x, gun_y);
     });
 
     //This event synchronize the time of 
-    socket.on("time synchronzation", (timeRemaining, gameStartTime) =>
+    socket.on("time synchronzation", (roomNo, playerId, timeRemaining, gameStartTime) =>
     {
-        io.to(gameRoom[1]).emit("time update", timeRemaining, gameStartTime);
+        io.to(roomNo).emit("time update", playerId, timeRemaining, gameStartTime);
     })
 
     //Initialization of game object and ability
-    socket.on("initital randomization", () => {
+    socket.on("initital randomization", (roomNo) => {
         let randomizationList = [];
         for(let i = 0; i < 3 ; i++){
             randomizationList.push(i);
@@ -78,35 +78,36 @@ io.on("connection",
         randomizationList.push(Math.floor(Math.random() *2));
         randomizationList.push(Math.floor(Math.random() * 800 + 100));
 
-        io.to(gameRoom[0]).emit("randomization list", randomizationList);
-        io.to(gameRoom[1]).emit("randomization list", randomizationList);
+        io.to(roomNo).emit("randomization list", randomizationList);
     });
 
-    socket.on("renew object", (i) => {
+    socket.on("renew object", (roomNo, i) => {
         let randomizationList = [];
         randomizationList.push(i);
         randomizationList.push(Math.floor(Math.random() *4));
         randomizationList.push(Math.floor(Math.random() *2));
         randomizationList.push(i);
-        io.to(gameRoom[0]).emit("regenerate object", randomizationList);
-        io.to(gameRoom[1]).emit("regenerate object", randomizationList);
+        io.to(roomNo).emit("regenerate object", randomizationList);
     });
 
-    socket.on("renew ability", (i) => {
+    socket.on("renew ability", (roomNo, i) => {
         let randomizationList = [];
         randomizationList.push(Math.floor(Math.random() *2));
         randomizationList.push(Math.floor(Math.random() * 800 + 100));
-        io.to(gameRoom[0]).emit("regenerate ability", randomizationList);
-        io.to(gameRoom[1]).emit("regenerate ability", randomizationList);
+        io.to(roomNo).emit("regenerate ability", randomizationList);
     });
 
-    socket.on("use cheat code x", (i) => {
-        io.to(gameRoom[(i + 1) % 2]).emit("other player use x");
+    socket.on("use cheat code x", (roomNo, playerId) => {
+        io.to(roomNo).emit("other player use x", playerId);
     });
+
+    socket.on("use cheat code z", (roomNo, playerId) => {
+        io.to(roomNo).emit("other player use z", playerId);
+    })
     
 
 
-})
+});
 
 //Start the server
 httpServer.listen(8000);

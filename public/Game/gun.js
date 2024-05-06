@@ -28,6 +28,10 @@ const Gun = function(ctx, x, y, gameArea)
     let lastShoot = 0;
 
     let shootSpeed = 1000;
+
+    //This set if the gun can move or not
+    let canMove = true;
+
     //Function setting the guns's moving direction
     const move = function(dir){
         direction = dir;
@@ -56,6 +60,16 @@ const Gun = function(ctx, x, y, gameArea)
         }
     }
 
+    const disableMove = function(){
+        canMove = false;
+    };
+
+    const enableMove = function(){
+        canMove = true;
+    }
+
+
+
     const shoot = function(time){
   
         let canShoot = false;
@@ -79,7 +93,7 @@ const Gun = function(ctx, x, y, gameArea)
 
     //Update the current location of the gun
     const update = function(time){
-        if(direction != 0){
+        if(direction != 0 && canMove){
             let {x, y} = sprite.getXY();
 
             switch(direction){
@@ -107,6 +121,8 @@ const Gun = function(ctx, x, y, gameArea)
         setXY: sprite.setXY,
         update: update,
         shoot: shoot,
-        shootSpeedUp: shootSpeedUp
+        shootSpeedUp: shootSpeedUp,
+        disableMove: disableMove,
+        enableMove: enableMove
     }
 };

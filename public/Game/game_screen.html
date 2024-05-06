@@ -88,6 +88,7 @@
 
         const gameStats = 
         {
+            roomNo: -1,
             playerId: -1,       //The player id
             gameStartTime: 0,   //Starting time of the game
             currentTime: 0,     //Current time of the game
@@ -128,7 +129,7 @@
             }
             else{
                 $("#count-down").text(num - 1);
-                setTimeout(gameStartCountDown(), 1000);
+                setTimeout(gameStartCountDown, 1000);
             }
         };
 
@@ -244,7 +245,10 @@
                 fireEvent(gameStats.playerId, awardPoints, objectHitted);
             }
             else if (event.keyCode == "88"){
-                useCheckCodeX();
+                useCheatCodeX();
+            }
+            else if(event.keyCode == "90"){
+                useCheatCodeZ();
             }
         });
 
@@ -274,28 +278,37 @@
             socket.on("connect", () => {
             });
 
+            socket.on("entered room", (roomNo, playerId) => {
+                gameStats.roomNo = roomNo;
+                gameStats.playerId = playerId;
+            })
             //Set up the matchFound event
-            socket.on("MatchFound", (id) => {
-                gameStats.playerId = id;
+            socket.on("MatchFound", () => {
                 gameStartCountDown();
             });
 
             //Set the the event when enemy hit a target
-            socket.on("enemy hit", (awardPoints) => {
-                gameStats.enemyScore += awardPoints;
-                $("#enemy-score").text(String(gameStats.enemyScore));
+            socket.on("enemy hit", (playerId, awardPoints) => {
+                if(gameStats.playerId != playerId){
+                    gameStats.enemyScore += awardPoints;
+                    $("#enemy-score").text(String(gameStats.enemyScore));
+                }
             });
 
             //Update the enemy gun information
-            socket.on("graphic update", (enemyGunX, enemyGunY) => {
-                gameGun.enemyGun.setXY(enemyGunX, enemyGunY);
+            socket.on("graphic update", (playerId, enemyGunX, enemyGunY) => {
+                if(gameStats.playerId != playerId){
+                    gameGun.enemyGun.setXY(enemyGunX, enemyGunY);
+                }
             });
 
             //Update the time information for player 1 to synchronize with player 0
-            socket.on("time update", (timeRemaining, gameStartTime) => {
-                gameStats.timeRemaining = timeRemaining;
-                gameStats.gameStartTime = gameStartTime
-                $("#time-remaining").text(timeRemaining);
+            socket.on("time update", (playerId ,timeRemaining, gameStartTime) => {
+                if(gameStats.playerId != playerId){
+                    gameStats.timeRemaining = timeRemaining;
+                    gameStats.gameStartTime = gameStartTime
+                    $("#time-remaining").text(timeRemaining);
+                }
             });
 
             //Do the initial randomizationv of game object and ability
@@ -318,9 +331,18 @@
                 abilitys[0].randomize(randomizationList[0], randomizationList[1]);
             });
 
-            socket.on("other player use x", () => {
-                gameStats.enemyScore += 100;
-                gameStats.gameStartTime -= 50000;
+            socket.on("other player use x", (playerId) => {
+                if(gameStats.playerId != playerId){
+                    gameStats.enemyScore += 100;
+                    gameStats.gameStartTime -= 50000;
+                }
+            });
+
+            socket.on("other player use z", (playerId) => {
+                if(gameStats.playerId != playerId){
+                    gameGun.playerGun.disableMove();
+                    setTimeout(gameGun.playerGun.enableMove, 10000);
+                }
             })
             
 
@@ -328,20 +350,20 @@
 
         const fireEvent = function(id, awardPoints, objectHitted){
             if(objectHitted != -1){
-                socket.emit("fire event", id, awardPoints, objectHitted);
+                socket.emit("fire event", gameStats.roomNo, id, awardPoints, objectHitted);
             }
         }
 
         const sendGraphicInfo = function(id, gun_x, gun_y){
-            socket.emit("graphic info", id, gun_x, gun_y);
+            socket.emit("graphic info", gameStats.roomNo, id, gun_x, gun_y);
         }
 
         const timeSynchronization = function(timeRemaining, gameStartTime){
-            socket.emit("time synchronzation", timeRemaining, gameStartTime);
+            socket.emit("time synchronzation", gameStats.roomNo, gameStats.playerId, timeRemaining, gameStartTime);
         }
  
         const initialRandomization = function(){
-            socket.emit("initital randomization");
+            socket.emit("initital randomization", gameStats.roomNo);
         }
 
         const randomizationObject = function(itemsList)
@@ -349,7 +371,7 @@
             for(let i = 0; i < itemsList.length; i++){
             let {x,y} = itemsList[i].getXY();
             if(x <= -100 || x >= 1300 || y >= 900)
-                socket.emit("renew object", i);
+                socket.emit("renew object", gameStats.roomNo, i);
             }
         }
 
@@ -358,7 +380,7 @@
             for(let i = 0; i < abilitysList.length; i++){
             let {x,y} = abilitysList[i].getXY();
             if(x <= -100 || x >= 1300 || y >= 900)
-                socket.emit("renew ability", i);
+                socket.emit("renew ability", gameStats.roomNo, i);
             }
         }
 
@@ -374,16 +396,20 @@
                     else if(abilityType == "moveBoost")
                         gun.speedUp();
                         
-                    socket.emit("renew ability", i)
+                    socket.emit("renew ability", gameStats.roomNo, i);
                 }
             }
         }
 
-        const useCheckCodeX = function()
+        const useCheatCodeX = function()
         {
             gameStats.score += 100;
             gameStats.gameStartTime -= 50000;
-            socket.emit("use cheat code x", gameStats.playerId);
+            socket.emit("use cheat code x", gameStats.roomNo, gameStats.playerId);
+        }
+
+        const useCheatCodeZ = function(){
+            socket.emit("use cheat code z", gameStats.roomNo, gameStats.playerId);
         }
 
         connect();
