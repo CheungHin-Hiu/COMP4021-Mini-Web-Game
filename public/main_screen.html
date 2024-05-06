@@ -29,7 +29,9 @@
 
             Authentication.validate(
                 () => {
-                    const { username } = Authentication.getUser();
+                    const { username, gamePlayed, gameWon } = Authentication.getUser();
+                    console.log("gamePlayed: ", gamePlayed)
+                    console.log("gameWon", gameWon)
                     $("#username").text(`Welcome back, ${username}`)
                 },
                 () => { window.location.href = "./index.html";}
