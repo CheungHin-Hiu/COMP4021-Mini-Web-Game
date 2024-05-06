@@ -79,10 +79,22 @@
     <script src="./scripts/game_object.js"></script>
     <script src="./scripts/ability.js"></script>
     <script src="socket.io/socket.io.min.js"></script>
+    <script src="./scripts/authentication.js"></script>
 
     <script>
 
     $(function() {
+
+        let user;
+
+        Authentication.validate(
+            () => {
+                user = Authentication.getUser();
+                console.log("dick", user)
+            },
+            () => { console.log("session expired")}
+        ); // validate the if that player have sign into the session already
+
         //Get the canvas and 2D content        
         const cv = $("canvas").get(0);
         const context = cv.getContext("2d");
@@ -96,6 +108,7 @@
         //Stores the useful game statisitcs
         const gameStats = 
         {
+            // userid: user.username,
             roomNo: -1,
             playerId: -1,       //The player id
             gameStartTime: 0,   //Starting time of the game
@@ -114,10 +127,10 @@
             ability: new Audio("ability1.mp3"),
             hit: new Audio("collect.mp3")
         }
-        sounds.background.volume = 0.2;
-        sounds.gameEnd.volume = 0.2;
-        sounds.ability.volume = 0.2;
-        sounds.hit.volume = 0.2;
+        sounds.background.volume = 0.05;
+        sounds.gameEnd.volume = 0.05;
+        sounds.ability.volume = 0.05;
+        sounds.hit.volume = 0.05;
         //Total play time of the game
         const totalGameTime = 120;
 
@@ -142,10 +155,16 @@
         //Functions to start the countdown after matched with an opponent (by server)
         const gameStartCountDown = function()
         {
-            $("#waiting").hide();
-            $("#game-start").show();
             const num = $("#count-down").text();
-            if(num == 0){
+            if(num==3){
+                $("#waiting").hide();
+                $("#game-start").show();
+                $("#count-down").text(num - 1);
+                console.log("count down at 3")
+                setTimeout(gameStartCountDown, 1000);
+            }
+            else if(num == 0){
+                console.log("start your mum")
                 $("#game-start").hide();
                 sounds.background.autoplay = false;
                 sounds.background.play();
@@ -153,6 +172,8 @@
             }
             else{
                 $("#count-down").text(num - 1);
+                console.log("count down at 2 1")
+
                 setTimeout(gameStartCountDown, 1000);
             }
         };
