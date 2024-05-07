@@ -35,7 +35,7 @@ canvas {
 
 #waiting text {
     font-size: 150%;
-    fill: url(#title-fill);
+    fill: url(#waiting-fill);
     text-anchor: middle;
 }
 

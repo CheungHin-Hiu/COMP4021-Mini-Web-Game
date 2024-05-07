@@ -112,6 +112,8 @@ io.on("connection", (socket) => {
         socket.emit("redirection to game ending screen", gameOverRedirectionURL);
     });
 
+
+
 });
 
 //Start the server
