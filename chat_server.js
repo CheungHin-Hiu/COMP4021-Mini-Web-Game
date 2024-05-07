@@ -278,6 +278,11 @@ io.on("connection", (socket) => {
         socket.emit("redirection to game ending screen", gameOverRedirectionURL);
     });
 
+    socket.on("disconnect", ()=>{
+        console.log("player disconnect form server");
+    });
+
+
 });
 
 //Start the server
