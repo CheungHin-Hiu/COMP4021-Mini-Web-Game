@@ -1,0 +1,52 @@
+body {
+    font-family: "Press Start 2P", sans-serif;
+}
+#game-container {
+    position: relative;
+}
+canvas, #counter, #game-start, #game-over, #waiting {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+canvas, #game-start, #game-over, #waiting{
+    border: 12px solid gray;
+    width: 1050px;
+    height: 700px;
+}
+#counter{
+    width: 1050px;
+    height: 80px;
+}
+canvas {
+    background: url(background_resize.png);
+    background-size: cover;
+}
+#game-start, #game-over, #waiting{
+    background: rgba(1, 1, 1, 0.8);
+}
+#counter text {
+    font-size: 120%;
+    fill: white;
+    stroke: black;
+    stroke-width: 1px;
+    text-anchor: middle;
+}
+
+#waiting text {
+    font-size: 150%;
+    fill: url(#waiting-fill);
+    text-anchor: middle;
+}
+
+#game-start text {
+    font-size: 150%;
+    fill: url(#title-fill);
+    text-anchor: middle;
+}
+
+#game-over text {
+    font-size: 200%;
+    fill: url(#game-over-fill);
+    text-anchor: middle;
+}

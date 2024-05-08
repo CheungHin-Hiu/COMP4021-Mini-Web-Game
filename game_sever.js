@@ -16,39 +16,105 @@ const {Server} = require("socket.io");
 const httpServer = createServer(app);
 const io = new Server(httpServer);
 
-//Objects storing the online players
-const onlineUsers = {};
+//Storing the total user connected to the server
+let userNo = 0;
 
-//The game room pairing up the players
-let gameRoom = [];
+//Storing the game room #
+let gameRoomNo;
 
-//The pending list of the player
-let pendingList = [];
+//URL for the game ending screen
+const gameOverRedirectionURL = "game_over.html";
+
 //Adding a new user to the online user list when the player connects to the WebSocket server
 io.on("connection", (socket) => {
     
-    const socketID = socket.id;  //Access the scoket.id value
-    if(gameRoom.length ==  0){
-        console.log("pushed first player");
-        gameRoom.push(socketID);
+    userNo++;
+    gameRoomNo = Math.round(userNo / 2);
+    socket.join(gameRoomNo);
+  
+    if(userNo % 2 == 1){
+        socket.emit("entered room", gameRoomNo, 0);
     }
-    else if(gameRoom.length == 1){
-        console.log("pushed second player");
-        gameRoom.push(socketID);
-        socket.broadcast.to(gameRoom[0]).emit("MatchFound", 0);
-        socket.broadcast.to(gameRoom[1]).emit("MatchFound", 1);
-    }
-    else{
-        pendingList.push(socketID);
+    else if(userNo % 2 == 0){
+        socket.emit("entered room", gameRoomNo, 1)
+        io.to(gameRoomNo).emit("MatchFound");
     }
 
-    socket.on("fire hit", (playerID, points) => 
+
+    //This event tells the opponent that another player have hitted the object i
+    socket.on("fire event", (roomNo, playerId, awardPoints, objectHitted) => 
     {
-        socket.broadcast.to(gameRoom[(playerID + 1) % 2]).emit("Enemy pint", points);
+        let randomizationList = [];
+        randomizationList.push(objectHitted);
+        randomizationList.push(Math.floor(Math.random() *4));
+        randomizationList.push(Math.floor(Math.random() *2));
+        randomizationList.push(objectHitted);
+        io.to(roomNo).emit("enemy hit", playerId, awardPoints);
+
+        io.to(roomNo).emit("regenerate hitted object", randomizationList);
+    });
+
+    //This event updates the enemyGun image of the opponent
+    socket.on("graphic info", (roomNo, playerId, gun_x, gun_y) => {
+        io.to(roomNo).emit("graphic update", playerId, gun_x, gun_y);
+    });
+
+    //This event synchronize the time of 
+    socket.on("time synchronzation", (roomNo, playerId, timeRemaining, gameStartTime) =>
+    {
+        io.to(roomNo).emit("time update", playerId, timeRemaining, gameStartTime);
+    })
+
+    //Initialization of game object and ability
+    socket.on("initital randomization", (roomNo) => {
+        let randomizationList = [];
+        for(let i = 0; i < 3 ; i++){
+            randomizationList.push(i);
+            randomizationList.push(Math.floor(Math.random() *4));
+            randomizationList.push(Math.floor(Math.random() *2));
+            randomizationList.push(i);
+        }
+        randomizationList.push(Math.floor(Math.random() *2));
+        randomizationList.push(Math.floor(Math.random() * 800 + 100));
+
+        io.to(roomNo).emit("randomization list", randomizationList);
+    });
+
+    //Regenerate new object
+    socket.on("renew object", (roomNo, i) => {
+        let randomizationList = [];
+        randomizationList.push(i);
+        randomizationList.push(Math.floor(Math.random() *4));
+        randomizationList.push(Math.floor(Math.random() *2));
+        randomizationList.push(i);
+        io.to(roomNo).emit("regenerate object", randomizationList);
+    });
+
+    //Regenerate new ability
+    socket.on("renew ability", (roomNo, i) => {
+        let randomizationList = [];
+        randomizationList.push(Math.floor(Math.random() *2));
+        randomizationList.push(Math.floor(Math.random() * 800 + 100));
+        io.to(roomNo).emit("regenerate ability", randomizationList);
+    });
+
+    //Notify players that cheat code x (+points and decrease game time)was used
+    socket.on("use cheat code x", (roomNo, playerId) => {
+        io.to(roomNo).emit("other player use x", playerId);
+    });
+
+    //Notify players that cheat code z (stop other from moving) is used
+    socket.on("use cheat code z", (roomNo, playerId) => {
+        io.to(roomNo).emit("other player use z", playerId);
+    });
+    
+    socket.on("game end", () => {
+        socket.emit("redirection to game ending screen", gameOverRedirectionURL);
     });
 
 
-})
+
+});
 
 //Start the server
 httpServer.listen(8000);

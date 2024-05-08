@@ -1,25 +1,20 @@
 {
  "axis": {
-  "password": "$2b$10$CUF4sO8MID8KMD51.he1F.wTihZ6ihIAKf8iRS1TasALFZcig0rUK",
+  "password": "$2b$10$ivKE.huDC6ghdItDZw3yCeX3i9Om.n2ScJIOVvej4uYv8liuP06A.",
   "highestScore": 0,
   "gamePlayed": 0,
   "gameWon": 0
  },
- "ax": {
-  "password": "$2b$10$7zLQMt53zSsCV8ar50sq.uyh42kh0pe8cGeZlpOwDl.w3j8PE6xWm",
+ "AndyHui": {
+  "password": "$2b$10$lhjp5jAYod.NA.OhoY65Z.EmmBXc/.OZpTPp9MpVRf.Sq1T.PbvUe",
   "highestScore": 0,
   "gamePlayed": 0,
   "gameWon": 0
  },
+
  "tony": {
-  "password": "$2b$10$0ATdsbJH6.xjUGui5V28Pel7J3t4IkAHPomUM6LT92v/pd4R.nHSu",
+  "password": "$2b$10$hIEEg536.q1r6LO1mgf7guC0SRi3LD4dYs5Vua.oMJgG1NzKmFsam",
   "highestScore": 17,
-  "gamePlayed": 0,
-  "gameWon": 0
- },
- "ss": {
-  "password": "$2b$10$TOgMSmlovZapzFWGAhMk4ung7Jzc2rctZF1v1sXUqWcbVBqENx2DS",
-  "highestScore": 0,
   "gamePlayed": 0,
   "gameWon": 0
  },
