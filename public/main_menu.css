@@ -136,3 +136,6 @@ button:active {
 #register-message{
     word-wrap: break-word;
 }
+table{
+    border-spacing: 10px;
+}
