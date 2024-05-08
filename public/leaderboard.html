@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Main Menu</title>
+    <title>Leaderboard</title>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -16,30 +16,78 @@
                 <button id="signout-button" class="icon"><span class="material-icons">logout</span></button>
             </div>
             <div class="center-container">
-                <h1>Leaderboard screen</h1>
+                <div class="title-text" style="font-size: x-large;">Leaderboard </div>
+                <div id="leaderboard" style="width: 80%;"></div>
             </div>
-            
         </div>
     </div>
     <script src="./scripts/authentication.js"></script>
     <script>
-         $(function () {
+        $(function () {
             let user = null;
 
             Authentication.validate(
                 () => {
                     const { username, gamePlayed, gameWon } = Authentication.getUser();
-
-                    $("#username").text(`Welcome back, ${username}`)
+                    $("#username").text(`Welcome back, ${username}`);
+                    loadLeaderboard();
                 },
                 () => { window.location.href = "./index.html";}
             ); // validate the if that player have sign into the session already
-            
+
             $("#signout-button").click(function(){
                 Authentication.signout();
                 window.location.href = "./index.html";
-            })
-        })
+            });
+
+            function loadLeaderboard() {
+            fetch('/leaderboard')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Convert data to array and sort by highest score in descending order
+                    let sortedUsers = Object.entries(data).map(([key, value]) => {
+                        return { username: key, ...value };
+                    }).sort((a, b) => b.highestScore - a.highestScore);
+
+                    // Ensure there are exactly 8 entries
+                    const leaderboardSize = 8;
+                    while (sortedUsers.length < leaderboardSize) {
+                        sortedUsers.push({ username: "-", highestScore: 0 });
+                    }
+                    sortedUsers = sortedUsers.slice(0, leaderboardSize);
+
+                    // Build leaderboard HTML
+                    let leaderboardHTML = "";
+                    const medals = ["goldmedal.png", "silvermedal.png", "bronzemedal.png"];
+                    sortedUsers.forEach((user, index) => {
+                        let medal = index < 3 ? medals[index] : "bronzemedal.png";
+                        let opacity = index < 3 ? 1 : 0;
+                        let position = ["th", "st", "nd", "rd"][(index + 1) % 10] || "th";
+
+                        leaderboardHTML += `
+                            <div class="instruction-text">
+                                <div><img src="${medal}" width="50px" style="opacity: ${opacity};"></div>
+                                <div class="leader-item">
+                                    <div>${index + 1}<span style="font-size: small;">${position}</span> ${user.username}</div>
+                                    <div>${user.username === "-" ? "-" : user.highestScore} points</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    $("#leaderboard").html(leaderboardHTML);
+                })
+                .catch(error => {
+                    console.error('Error loading leaderboard:', error);
+                    $("#leaderboard").html(`<div class="instruction-text">Error loading leaderboard. Please try again later.</div>`);
+                });
+            }
+        });
     </script>
 </body>
 </html>

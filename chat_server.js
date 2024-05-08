@@ -158,6 +158,19 @@ app.get("/validate", (req, res) => {
  
 });
 
+// Handle the /leaderboard endpoint
+app.get("/leaderboard", (req, res) => {
+    // Read users.json
+    fs.readFile("./data/users.json", "utf8", (err, data) => {
+        if (err) {
+            res.status(500).json({ status: "error", error: "Could not read users.json" });
+            return;
+        }
+        res.json(JSON.parse(data));
+    });
+});
+
+
 // Handle the /signout endpoint
 app.get("/signout", (req, res) => {
 
