@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Main Menu</title>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -7,37 +8,42 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="../main_menu.css" rel="stylesheet">
 </head>
+
 <body>
-    <div id = "game-container">
-        <canvas width = "1050px" height="700px"></canvas>
+    <div id="game-container">
+        <canvas width="1050px" height="700px"></canvas>
         <div id="start-menu">
             <div class="row">
                 <div id="username"></div>
                 <button id="signout-button" class="icon"><span class="material-icons">logout</span></button>
             </div>
             <div class="center-container">
-                <a class="body-text" href="./game_screen.html">Start</a>
+                <a class="body-text" id="game_url" href="./game_screen.html">Start</a>
                 <a class="body-text" href="./leaderboard.html">Leaderboard</a>
+                <a class="body-text" href="./instruction.html">Instructions</a>
+
             </div>
-            
+
         </div>
     </div>
     <script src="./scripts/authentication.js"></script>
     <script>
-         $(function () {
+        $(function () {
             let user = null;
 
             Authentication.validate(
                 () => {
+                    user = Authentication.getUser();
                     const { username, gamePlayed, gameWon } = Authentication.getUser();
                     console.log("gamePlayed: ", gamePlayed)
                     console.log("gameWon", gameWon)
                     $("#username").text(`Welcome back, ${username}`)
+                    $('#game_url').attr('href', `game_screen.html?username=${user.username}`);
                 },
-                () => { window.location.href = "./index.html";}
+                () => { window.location.href = "./index.html"; }
             ); // validate the if that player have sign into the session already
-            
-            $("#signout-button").click(function(){
+
+            $("#signout-button").click(function () {
                 Authentication.signout();
                 window.location.href = "./index.html";
             })
@@ -68,9 +74,43 @@
                     event.preventDefault(); // Prevent the default link behavior
                     const link = links.eq(currentIndex).attr('href');
                     window.location.href = link; // Navigate to the selected link
+
+                    // console.log(link);
+                    // if (link == "./game_screen.html") {
+                    //     window.location.href = link + "?" + "username=" + user.username;
+                    //     console.log(user)
+                    //     console.log(`${link}+"?"+"username="+${user.username};`)
+                    //     console.log("entered if")
+                    // }
+                    // else {
+                    //     window.location.href = link; // Navigate to the selected link
+                    //     console.log("entered else")
+                    // }
+
                 }
+
+                const anchor = document.getElementById('game_url');
+
+                anchor.addEventListener('click', function (event) {
+                    event.preventDefault(); // Prevent the default link behavior
+
+                    // Get the current URL
+                    const currentUrl = window.location.href;
+
+                    // Create the query string
+                    const queryString = 'username='+user.username;
+
+                    // Update the anchor tag's href with the query string
+                    this.href = `${currentUrl}?${queryString}`;
+
+                    // Optionally, you can navigate to the updated URL
+                    // window.location.href = this.href;
+                });
             });
+
+
         })
     </script>
 </body>
+
 </html>

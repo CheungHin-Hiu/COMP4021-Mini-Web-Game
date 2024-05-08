@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Main Menu</title>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P" rel="stylesheet">
     <link href="../main_menu.css" rel="stylesheet">
 </head>
+
 <body>
-    <div id = "game-container">
-        <canvas width = "1050px" height="700px"></canvas>
-        <div id="menu">
+    <div id="game-container">
+        <canvas width="1050px" height="700px"></canvas>
+        <div style="position: absolute;top: 20px;left: 20px;  z-index: 1">
+            <button id="backBtn">Back</button>
+        </div>
+        <div id="menu" style="z-index: 0;">
+
+
             <div class="title-text">Welcome to Matusri - a 2-player online shooting game!</div>
 
             <div id="instructions">
@@ -37,10 +44,42 @@
                 </div>
                 <div class="body-text">Game lasts for 150 seconds. Highest score wins the game.</div>
                 <div class="title-text" style="margin-top: 75px;">Good luck and have fun!!!</div>
+
             </div>
 
         </div>
     </div>
-    <script></script>
+    <script src="./scripts/authentication.js"></script>
+
+    <script>
+        $(function () {
+
+
+
+            let user = null;
+
+            Authentication.validate(
+                () => {
+                    const { username, gamePlayed, gameWon } = Authentication.getUser();
+                    console.log("gamePlayed: ", gamePlayed)
+                    console.log("gameWon", gameWon)
+                    $("#username").text(`Welcome back, ${username}`)
+                },
+                () => { }
+            ); // validate the if that player have sign into the session already
+
+
+            $("#backBtn").on("click", () => {
+                if (user === null) {
+                    window.location.href = "./index.html";
+
+                } else {
+                    window.location.href = "./main_screen.html";
+                }
+            });
+        });
+
+    </script>
 </body>
+
 </html>

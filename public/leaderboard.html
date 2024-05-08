@@ -14,6 +14,7 @@
         <canvas width="1050px" height="700px"></canvas>
         <div id="start-menu">
             <div class="row">
+                <button id="backBtn">Back</button>
                 <div id="username"></div>
                 <button id="signout-button" class="icon"><span class="material-icons">logout</span></button>
             </div>
@@ -26,6 +27,11 @@
     <script src="./scripts/authentication.js"></script>
     <script>
         $(function () {
+
+            $("#backBtn").on("click", () => {
+                window.location.href = "./main_screen.html";
+            });
+
             let user = null;
 
             Authentication.validate(
