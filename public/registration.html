@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Main Menu</title>
+    <title>Registration</title>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P" rel="stylesheet">
     <link href="../main_menu.css" rel="stylesheet">
@@ -9,6 +9,9 @@
 <body>
     <div id = "game-container">
         <canvas width = "1050px" height="700px"></canvas>
+        <div style="position: absolute;top: 20px;left: 20px;  z-index: 1">
+            <button id="backBtn">Back</button>
+        </div>
         <div id="menu">
             <form id="register-form" class="col">
                 <div class="caption title-text">Registration</div>
@@ -23,6 +26,14 @@
         </div>
     </div>
     <script src="./scripts/registration.js"></script>
+    <script>
+        $(function () {
+            $("#backBtn").on("click", () => {
+                    window.location.href = "./index.html";
+            });
+        });
+
+    </script>
 </body>
 
 </html>

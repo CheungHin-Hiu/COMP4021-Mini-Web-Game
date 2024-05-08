@@ -13,6 +13,7 @@
         <canvas width="1050px" height="700px"></canvas>
 
         <div id="menu">
+            <div><img src="logo.png" width="450px"></div>
             <div class="title-text" id="menu-text" class="warning center"></div>
 
 
@@ -36,7 +37,7 @@
                     $("#menu-text").text(`session sign in: ${username}`)
                     window.location.href = "./main_screen.html";
                 },
-                () => { $("#menu-text").text("Please sign in or register")}
+                () => { $("#menu-text").text("Please sign in or register to play")}
             ); // validate the if that player have sign into the session already
 
             const links = $('#menu a');
