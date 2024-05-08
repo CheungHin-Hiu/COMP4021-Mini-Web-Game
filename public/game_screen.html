@@ -107,7 +107,7 @@
         //Stores the useful game statisitcs
         const gameStats = 
         {
-            // userid: user,
+            username: null,
             roomNo: -1,
             playerId: -1,       //The player id
             gameStartTime: 0,   //Starting time of the game
@@ -118,6 +118,12 @@
             enemyScore: 0,       //Score of opponent
             timeRemaining: 120  //Remaining time of the game
         };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryString = urlParams.toString(); // Retrieves the entire query string
+        const para1 = urlParams.get("username");
+        console.log(para1);
+        gameStats.username = para1;
 
         const sounds = {
             background: new Audio("background_music.mp3"),
@@ -392,7 +398,7 @@
             //Receive info that other player use cheat code x
             socket.on("other player use x", (playerId) => {
                 if(gameStats.playerId != playerId){
-                    gameStats.enemyScore += 100;
+                    gameStats.enemyScore += 20;
                     gameStats.gameStartTime -= 50000;
                 }
             });
@@ -408,7 +414,10 @@
             //Redirection to the game ending page
             socket.on("redirection to game ending screen", (gameOverRedirectionURL) => {
                 socket.disconnect();
-                window.location.href = gameOverRedirectionURL;
+                if(gameStats.enemyScore > gameStats.score)
+                    window.location.href = gameOverRedirectionURL + "?username="+gameStats.username+"&score="+gameStats.score+"&status=lose";
+                else
+                window.location.href = gameOverRedirectionURL + "?username="+gameStats.username+"&score="+gameStats.score+"&status=win";
             });
             
 
@@ -478,7 +487,7 @@
         //Inform the server that cheat code x is used
         const useCheatCodeX = function()
         {
-            gameStats.score += 100;
+            gameStats.score += 20;
             gameStats.gameStartTime -= 50000;
             socket.emit("use cheat code x", gameStats.roomNo, gameStats.playerId);
         }
