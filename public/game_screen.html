@@ -326,6 +326,30 @@
             }
         });
 
+        const updateStats = function() {
+            //console.log("Preparing to send update stats request");  // Verify this is logged
+
+            // Access gameStats from a broader scope if necessary, or ensure it is passed correctly
+            const stats = {
+                username: gameStats.username,
+                newScore: gameStats.score,
+                gameWon: gameStats.score > gameStats.enemyScore
+            };
+
+            //console.log("Sending request with data:", stats);
+
+            fetch('/update-stats', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(stats)
+            })
+            .then(response => response.json())
+            .then(data => console.log('Server response:', data))
+            .catch(error => console.error('Error updating stats:', error));
+        };
+
         //This stores the current Socket.IO socket
         let socket = null;
 
@@ -411,8 +435,10 @@
                 }
             });
 
+
             //Redirection to the game ending page
             socket.on("redirection to game ending screen", (gameOverRedirectionURL) => {
+                updateStats();
                 socket.disconnect();
                 if(gameStats.enemyScore > gameStats.score)
                     window.location.href = gameOverRedirectionURL + "?username="+gameStats.username+"&score="+gameStats.score+"&status=lose";
@@ -496,6 +522,9 @@
         const useCheatCodeZ = function(){
             socket.emit("use cheat code z", gameStats.roomNo, gameStats.playerId);
         }
+
+        
+
 
         //Inform the server that the game has ended and should redirect to the new screen
         const redirectionToGameEnd = function(){
