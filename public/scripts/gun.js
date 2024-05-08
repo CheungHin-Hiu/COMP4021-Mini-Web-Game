@@ -87,7 +87,7 @@ const Gun = function(ctx, x, y, gameArea)
             let {x, y} = sprite.getXY();
             return {x, y};
          }
-        return(-1, -1);
+        return(-1000, -1000);
      
     }
 
