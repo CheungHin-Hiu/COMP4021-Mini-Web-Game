@@ -310,7 +310,7 @@
                 const {awardPoints, objectHitted} = checkFireHit(x, y, objects);
                 fireEvent(gameStats.playerId, awardPoints, objectHitted);
             }
-            else if (event.keyCode == "88"){
+            else if (event.keyCode == "88" && gameStats.timeRemaining > 0){
                 useCheatCodeX();
             }
             else if(event.keyCode == "90"){
