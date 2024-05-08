@@ -78,6 +78,7 @@
     <script src="./scripts/gun.js"></script>
     <script src="./scripts/game_object.js"></script>
     <script src="./scripts/ability.js"></script>
+    <script src="./scripts/bullet_hole.js"></script>
     <script src="./scripts/authentication.js"></script>
     <script src="socket.io/socket.io.min.js"></script>
     
@@ -116,7 +117,7 @@
             hitShot: 0,         //Total shit hitted
             score: 0,           //Current score 
             enemyScore: 0,       //Score of opponent
-            timeRemaining: 120  //Remaining time of the game
+            timeRemaining: 150  //Remaining time of the game
         };
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -132,12 +133,13 @@
             ability: new Audio("ability1.mp3"),
             hit: new Audio("collect.mp3")
         }
-        sounds.background.volume = 0.05;
-        sounds.gameEnd.volume = 0.05;
-        sounds.ability.volume = 0.05;
-        sounds.hit.volume = 0.05;
+        sounds.background.volume = 0.25;
+        sounds.gameEnd.volume = 0.25;
+        sounds.ability.volume = 0.25;
+        sounds.hit.volume = 0.25;
+        sounds.fire.volume = 0.25;
         //Total play time of the game
-        const totalGameTime = 120;
+        const totalGameTime = 150;
 
         //Create the game area
         const gameArea = BoundingBox(context, 0, 0, 700, 1050);
@@ -156,6 +158,8 @@
 
         //Ability in the game
         const abilitys = [Ability(context, 0, 0,"shootBoost")];
+
+        const bulletHole = Bullethole(context, -1000, -1000);
 
         //Functions to start the countdown after matched with an opponent (by server)
         const gameStartCountDown = function()
@@ -263,6 +267,7 @@
             objects[1].update(now);
             objects[2].update(now);
             abilitys[0].update(now);
+            bulletHole.hideHole(gameStats.currentTime);
             
             if(gameStats.playerId == 0)
             {
@@ -272,12 +277,14 @@
             checkCollision(x,y, abilitys,gameGun.playerGun);
             Canvas.context.clearRect(0, 0, Canvas.cv.width, Canvas.cv.height);
 
+            bulletHole.draw();
             objects[0].draw();
             objects[1].draw();
             objects[2].draw();
             abilitys[0].draw();
             gameGun.playerGun.draw();
             gameGun.enemyGun.draw();
+
             requestAnimationFrame(doFrame);
         }
 
@@ -299,6 +306,7 @@
                 sounds.fire.currentTime = 0;
                 sounds.fire.play();
                 const {x, y} = gameGun.playerGun.shoot(gameStats.currentTime);
+                bulletHole.setXY(x,y, gameStats.currentTime);
                 const {awardPoints, objectHitted} = checkFireHit(x, y, objects);
                 fireEvent(gameStats.playerId, awardPoints, objectHitted);
             }
