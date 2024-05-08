@@ -170,6 +170,54 @@ app.get("/leaderboard", (req, res) => {
     });
 });
 
+app.get("/user-info", (req, res) => {
+    if (!req.session.user) {
+        res.status(401).json({
+            status: "error",
+            error: "User not logged in"
+        });
+        return;
+    }
+    const username = req.session.user.username;
+    const users = JSON.parse(fs.readFileSync("./data/users.json"));
+    const userInfo = users[username];
+    if(userInfo) {
+        res.json({
+            status: "success",
+            highestScore: userInfo.highestScore
+        });
+    } else {
+        res.status(404).json({
+            status: "error",
+            error: "User data not found"
+        });
+    }
+});
+
+// Endpoint to update user stats
+app.post("/update-stats", (req, res) => {
+    //console.log("Update request received:", req.body);  // Log the incoming request body to debug
+
+    const { username, newScore, gameWon } = req.body;
+    const usersData = JSON.parse(fs.readFileSync("./data/users.json", 'utf8'));
+
+    //console.log("Current users data:", usersData);  // See what the current users data looks like
+
+    if (usersData[username]) {
+        usersData[username].gamePlayed += 1;
+        usersData[username].highestScore = Math.max(usersData[username].highestScore, newScore);
+        if (gameWon) {
+            usersData[username].gameWon += 1;
+        }
+
+        // Attempt to write to the file
+        fs.writeFileSync("./data/users.json", JSON.stringify(usersData, null, 4));
+        //console.log("Data updated for user:", username);
+        res.json({ status: "success" });
+    } else {
+        res.status(404).json({ status: "error", error: "User not found" });
+    }
+});
 
 // Handle the /signout endpoint
 app.get("/signout", (req, res) => {
