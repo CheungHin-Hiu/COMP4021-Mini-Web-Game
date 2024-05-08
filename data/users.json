@@ -1,38 +1,38 @@
 {
- "axis": {
-  "password": "$2b$10$ivKE.huDC6ghdItDZw3yCeX3i9Om.n2ScJIOVvej4uYv8liuP06A.",
-  "highestScore": 0,
-  "gamePlayed": 0,
-  "gameWon": 0
- },
- "AndyHui": {
-  "password": "$2b$10$lhjp5jAYod.NA.OhoY65Z.EmmBXc/.OZpTPp9MpVRf.Sq1T.PbvUe",
-  "highestScore": 0,
-  "gamePlayed": 0,
-  "gameWon": 0
- },
- "tony": {
-  "password": "$2b$10$hIEEg536.q1r6LO1mgf7guC0SRi3LD4dYs5Vua.oMJgG1NzKmFsam",
-  "highestScore": 17,
-  "gamePlayed": 0,
-  "gameWon": 0
- },
- "nat": {
-  "password": "$2b$10$b5vMyuvadP0lbfHeUJDSeOQzAUE83FyLrW9giqzEGw0bEsb1KtxDq",
-  "highestScore": 60,
-  "gamePlayed": 6,
-  "gameWon": 1
- },
- "nat2": {
-  "password": "$2b$10$BxFlnlqeKq64qiuBWQ4Rq.Qi7Fvm3XmwHQ9kkHrRLM8GtzzpoQLRW",
-  "highestScore": 75,
-  "gamePlayed": 6,
-  "gameWon": 5
- },
- "peter": {
-  "password": "$2b$10$vhujTcGzO3nSErltbKFBgus3j/jTJpRkn7gS9MgwNRuNjSGrJBcgK",
-  "highestScore": 0,
-  "gamePlayed": 0,
-  "gameWon": 0
- }
+    "axis": {
+        "password": "$2b$10$ivKE.huDC6ghdItDZw3yCeX3i9Om.n2ScJIOVvej4uYv8liuP06A.",
+        "highestScore": 0,
+        "gamePlayed": 0,
+        "gameWon": 0
+    },
+    "AndyHui": {
+        "password": "$2b$10$lhjp5jAYod.NA.OhoY65Z.EmmBXc/.OZpTPp9MpVRf.Sq1T.PbvUe",
+        "highestScore": 0,
+        "gamePlayed": 0,
+        "gameWon": 0
+    },
+    "tony": {
+        "password": "$2b$10$hIEEg536.q1r6LO1mgf7guC0SRi3LD4dYs5Vua.oMJgG1NzKmFsam",
+        "highestScore": 17,
+        "gamePlayed": 0,
+        "gameWon": 0
+    },
+    "nat": {
+        "password": "$2b$10$b5vMyuvadP0lbfHeUJDSeOQzAUE83FyLrW9giqzEGw0bEsb1KtxDq",
+        "highestScore": 60,
+        "gamePlayed": 7,
+        "gameWon": 1
+    },
+    "nat2": {
+        "password": "$2b$10$BxFlnlqeKq64qiuBWQ4Rq.Qi7Fvm3XmwHQ9kkHrRLM8GtzzpoQLRW",
+        "highestScore": 75,
+        "gamePlayed": 7,
+        "gameWon": 6
+    },
+    "peter": {
+        "password": "$2b$10$vhujTcGzO3nSErltbKFBgus3j/jTJpRkn7gS9MgwNRuNjSGrJBcgK",
+        "highestScore": 0,
+        "gamePlayed": 0,
+        "gameWon": 0
+    }
 }
