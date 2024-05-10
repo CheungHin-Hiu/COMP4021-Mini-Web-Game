@@ -11,12 +11,6 @@
         "gamePlayed": 0,
         "gameWon": 0
     },
-    "tony": {
-        "password": "$2b$10$hIEEg536.q1r6LO1mgf7guC0SRi3LD4dYs5Vua.oMJgG1NzKmFsam",
-        "highestScore": 17,
-        "gamePlayed": 0,
-        "gameWon": 0
-    },
     "nat": {
         "password": "$2b$10$b5vMyuvadP0lbfHeUJDSeOQzAUE83FyLrW9giqzEGw0bEsb1KtxDq",
         "highestScore": 60,
