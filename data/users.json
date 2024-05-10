@@ -22,17 +22,5 @@
         "highestScore": 60,
         "gamePlayed": 7,
         "gameWon": 1
-    },
-    "nat2": {
-        "password": "$2b$10$BxFlnlqeKq64qiuBWQ4Rq.Qi7Fvm3XmwHQ9kkHrRLM8GtzzpoQLRW",
-        "highestScore": 75,
-        "gamePlayed": 7,
-        "gameWon": 6
-    },
-    "peter": {
-        "password": "$2b$10$vhujTcGzO3nSErltbKFBgus3j/jTJpRkn7gS9MgwNRuNjSGrJBcgK",
-        "highestScore": 0,
-        "gamePlayed": 0,
-        "gameWon": 0
     }
 }
